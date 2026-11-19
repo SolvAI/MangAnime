@@ -156,5 +156,6 @@ eval/           sprint-by-sprint evaluation with side-by-side videos
 
 ## License and notice
 
-Code: [MIT](LICENSE). Media in `docs/`: short, silent evaluation excerpts, not covered by the code licence.
+Code: [MIT](LICENSE). The licence covers the source code only: the media in `docs/` are short, silent evaluation excerpts
+and are not covered by it, nor is any manga, anime, audio or model weight the code is run on.
 Third-party works, voices and removal requests: [NOTICE.md](NOTICE.md).
