@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}A/B rating {{ n_done + 1 }}/{{ n_pairs }}{% endblock %}
+{% block head %}
+  <span class="mut">pair {{ n_done + 1 }} of {{ n_pairs }}</span>
+  <div class="bar"><div style="width:{{ (100 * n_done / n_pairs)|round(1) }}%"></div></div>
+  <span class="sp"></span>
+  <span class="mut">{{ rater }}</span>
+  <a href="/logout">switch rater</a>
+{% endblock %}
+{% block main %}
+<div class="videos">
+  <div class="vbox" id="boxL"><span class="tag">LEFT · 1</span><video id="vL" src="/media/{{ tok_left }}" preload="auto" playsinline muted disablepictureinpicture></video><span class="err">This clip could not be played. Use "Skip".</span></div>
+  <div class="vbox" id="boxR"><span class="tag">RIGHT · 2</span><video id="vR" src="/media/{{ tok_right }}" preload="auto" playsinline muted disablepictureinpicture></video><span class="err">This clip could not be played. Use "Skip".</span></div>
+</div>
+<div class="controls">
+  <button type="button" id="play">Pause</button>
+  <button type="button" id="restart">Restart</button>
+  <label><input type="checkbox" id="loop" checked> loop</label>
+  <input type="range" id="seek" min="0" max="1" step="0.01" value="0" aria-label="position">
+  <span class="mut" id="time">0.00 s</span>
+  <span class="mut">audio</span>
+  <button type="button" data-audio="left">left</button>
+  <button type="button" data-audio="right">right</button>
+  <button type="button" data-audio="off">off</button>
+</div>
+{% if caption %}<p class="card" style="margin:0 0 10px">{{ caption }}</p>{% endif %}
+<form method="post" action="/rate" id="rateform" class="card">
+  <input type="hidden" name="pres" value="{{ pres }}">
+  <input type="hidden" name="duration_ms" id="duration_ms" value="">
+  {% for c in criteria %}
+  <div class="crit" data-i="{{ loop.index0 }}">
+    <span class="name">{{ c }}</span>
+    <label><input type="radio" name="c{{ loop.index0 }}" value="left"><span>Left <kbd>1</kbd></span></label>
+    <label><input type="radio" name="c{{ loop.index0 }}" value="tie"><span>Tie <kbd>=</kbd></span></label>
+    <label><input type="radio" name="c{{ loop.index0 }}" value="right"><span>Right <kbd>2</kbd></span></label>
+  </div>
+  {% endfor %}
+  <div class="row">
+    <input type="text" name="note" placeholder="optional note" maxlength="1000" style="flex:1;min-width:200px">
+    <button class="primary" type="submit" id="submit" disabled>Submit <kbd>Enter</kbd></button>
+  </div>
+</form>
+<div class="row">
+  <form method="post" action="/skip"><input type="hidden" name="pres" value="{{ pres }}"><button type="submit">Skip (rate later)</button></form>
+  {% if can_undo %}<form method="post" action="/undo" id="undoform"><button type="submit">Undo my last rating <kbd>U</kbd></button></form>{% endif %}
+</div>
+<p class="keys"><kbd>1</kbd> left · <kbd>2</kbd> right · <kbd>=</kbd> tie · <kbd>Enter</kbd> submit · <kbd>Space</kbd> play/pause · <kbd>R</kbd> restart · <kbd>L</kbd> loop · <kbd>,</kbd> <kbd>.</kbd> frame step · <kbd>A</kbd>/<kbd>S</kbd>/<kbd>D</kbd> audio left/right/off · <kbd>↑</kbd><kbd>↓</kbd> criterion</p>
+<script src="/static/ab.js"></script>
+{% endblock %}

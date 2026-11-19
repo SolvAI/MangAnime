@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1222 424" width="1222" height="424" font-family="system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="1222" height="424" rx="14" fill="#f6f7f9"/>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6b7280"/></marker></defs>
+<rect x="24" y="24" width="268" height="96" rx="10" fill="#ffffff" stroke="#2f6fed" stroke-width="2"/>
+<text x="40" y="54" font-size="17" font-weight="700" fill="#111827">Manga chapter</text>
+<text x="40" y="78" font-size="13.5" fill="#4b5563">pages, panels, balloons</text>
+<line x1="296" y1="72.0" x2="321" y2="72.0" stroke="#6b7280" stroke-width="2" marker-end="url(#a)"/>
+<rect x="326" y="24" width="268" height="96" rx="10" fill="#ffffff" stroke="#2f6fed" stroke-width="2"/>
+<text x="342" y="54" font-size="17" font-weight="700" fill="#111827">Read</text>
+<text x="342" y="78" font-size="13.5" fill="#4b5563">VLM names who is in each panel</text>
+<text x="342" y="97" font-size="13.5" fill="#4b5563">and who says each line</text>
+<line x1="598" y1="72.0" x2="623" y2="72.0" stroke="#6b7280" stroke-width="2" marker-end="url(#a)"/>
+<rect x="628" y="24" width="268" height="96" rx="10" fill="#ffffff" stroke="#2f6fed" stroke-width="2"/>
+<text x="644" y="54" font-size="17" font-weight="700" fill="#111827">Screenplay</text>
+<text x="644" y="78" font-size="13.5" fill="#4b5563">LLM writes scenes and lines,</text>
+<text x="644" y="97" font-size="13.5" fill="#4b5563">tightened to the show's pace</text>
+<line x1="900" y1="72.0" x2="925" y2="72.0" stroke="#6b7280" stroke-width="2" marker-end="url(#a)"/>
+<rect x="930" y="24" width="268" height="96" rx="10" fill="#ffffff" stroke="#2f6fed" stroke-width="2"/>
+<text x="946" y="54" font-size="17" font-weight="700" fill="#111827">Shot plan</text>
+<text x="946" y="78" font-size="13.5" fill="#4b5563">size, people, action,</text>
+<text x="946" y="97" font-size="13.5" fill="#4b5563">source panel per shot</text>
+<path d="M1064.0 123 V142.0 H158.0 V159" fill="none" stroke="#6b7280" stroke-width="2" marker-end="url(#a)"/>
+<rect x="24" y="164" width="268" height="96" rx="10" fill="#ffffff" stroke="#0f9d77" stroke-width="2"/>
+<text x="40" y="194" font-size="17" font-weight="700" fill="#111827">Wardrobe + voices</text>
+<text x="40" y="218" font-size="13.5" fill="#4b5563">one outfit per scene;</text>
+<text x="40" y="237" font-size="13.5" fill="#4b5563">TTS sets shot lengths</text>
+<line x1="296" y1="212.0" x2="321" y2="212.0" stroke="#6b7280" stroke-width="2" marker-end="url(#a)"/>
+<rect x="326" y="164" width="268" height="96" rx="10" fill="#ffffff" stroke="#0f9d77" stroke-width="2"/>
+<text x="342" y="194" font-size="17" font-weight="700" fill="#111827">Editor + camera pass</text>
+<text x="342" y="218" font-size="13.5" fill="#4b5563">cut on the line; angle, view,</text>
+<text x="342" y="237" font-size="13.5" fill="#4b5563">foreground per shot</text>
+<line x1="598" y1="212.0" x2="623" y2="212.0" stroke="#6b7280" stroke-width="2" marker-end="url(#a)"/>
+<rect x="628" y="164" width="268" height="96" rx="10" fill="#ffffff" stroke="#0f9d77" stroke-width="2"/>
+<text x="644" y="194" font-size="17" font-weight="700" fill="#111827">First frames</text>
+<text x="644" y="218" font-size="13.5" fill="#4b5563">image model with cast, set,</text>
+<text x="644" y="237" font-size="13.5" fill="#4b5563">style and panel references</text>
+<line x1="900" y1="212.0" x2="925" y2="212.0" stroke="#6b7280" stroke-width="2" marker-end="url(#a)"/>
+<rect x="930" y="164" width="268" height="96" rx="10" fill="#ffffff" stroke="#0f9d77" stroke-width="2"/>
+<text x="946" y="194" font-size="17" font-weight="700" fill="#111827">Checks</text>
+<text x="946" y="218" font-size="13.5" fill="#4b5563">cast check, continuity repair,</text>
+<text x="946" y="237" font-size="13.5" fill="#4b5563">reframing to the show's shot sizes</text>
+<path d="M1064.0 263 V282.0 H158.0 V299" fill="none" stroke="#6b7280" stroke-width="2" marker-end="url(#a)"/>
+<rect x="24" y="304" width="268" height="96" rx="10" fill="#ffffff" stroke="#c2571a" stroke-width="2"/>
+<text x="40" y="334" font-size="17" font-weight="700" fill="#111827">Clips</text>
+<text x="40" y="358" font-size="13.5" fill="#4b5563">Wan 2.2 image-to-video,</text>
+<text x="40" y="377" font-size="13.5" fill="#4b5563">16 fps, clip check, retakes</text>
+<line x1="296" y1="352.0" x2="321" y2="352.0" stroke="#6b7280" stroke-width="2" marker-end="url(#a)"/>
+<rect x="326" y="304" width="268" height="96" rx="10" fill="#ffffff" stroke="#c2571a" stroke-width="2"/>
+<text x="342" y="334" font-size="17" font-weight="700" fill="#111827">All-ages screen</text>
+<text x="342" y="358" font-size="13.5" fill="#4b5563">every clip screened;</text>
+<text x="342" y="377" font-size="13.5" fill="#4b5563">flagged clips become held frames</text>
+<line x1="598" y1="352.0" x2="623" y2="352.0" stroke="#6b7280" stroke-width="2" marker-end="url(#a)"/>
+<rect x="628" y="304" width="268" height="96" rx="10" fill="#ffffff" stroke="#c2571a" stroke-width="2"/>
+<text x="644" y="334" font-size="17" font-weight="700" fill="#111827">Mix + assembly</text>
+<text x="644" y="358" font-size="13.5" fill="#4b5563">voices, music, subtitles,</text>
+<text x="644" y="377" font-size="13.5" fill="#4b5563">episode + animatic twin</text>
+<line x1="900" y1="352.0" x2="925" y2="352.0" stroke="#6b7280" stroke-width="2" marker-end="url(#a)"/>
+<rect x="930" y="304" width="268" height="96" rx="10" fill="#ffffff" stroke="#c2571a" stroke-width="2"/>
+<text x="946" y="334" font-size="17" font-weight="700" fill="#111827">Evaluation</text>
+<text x="946" y="358" font-size="13.5" fill="#4b5563">vs the real held-out episode:</text>
+<text x="946" y="377" font-size="13.5" fill="#4b5563">FVD, continuity, blind A/B</text>
+</svg>

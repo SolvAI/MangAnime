@@ -1,0 +1,93 @@
+# English TTS: Qwen3-TTS 1.7B (voice cloning + instructions). Namespaced as CFG.tts_qwen.
+# Code: src/generate/tts_qwen.py, src/train/qwen_sft.py, src/eval/emotion_probe.py. Docs: docs/tts_qwen.md
+engine: qwen3-tts-12hz-1.7b
+package: qwen-tts==0.1.1                               # pip package in venvs/qwentts (Python 3.12, torch 2.8.0+cu128)
+venv_python: ${paths.work}/venvs/qwentts/bin/python
+model_root: ${paths.models}/tts/qwen3
+models:
+  base: ${paths.models}/tts/qwen3/Qwen3-TTS-12Hz-1.7B-Base                 # voice clone (speaker encoder lives here)
+  custom_voice: ${paths.models}/tts/qwen3/Qwen3-TTS-12Hz-1.7B-CustomVoice  # preset speakers + `instruct`
+finetuned:                     # speaker -> fine-tuned checkpoint dir (tts_model_type custom_voice), see src/train/qwen_sft.py
+  Tadano: ${paths.models}/tts/qwen3/ft/Tadano_base_e3    # 3 epochs on 12 min of dub speech; used only by "mode": "custom"
+cache_dir: ${paths.cache}/tts_qwen
+vram_gb: 8                     # admission size for scripts/gpu_run.sh at batch_size 1 (measured peak 5.1 GB per model;
+                               # batch_size 8 needs up to 14.2 GB: request 15 when you raise batch_size)
+dtype: bfloat16
+attn_implementation: null      # null = library default (flash-attn is not installed)
+seed: 20261112                 # base seed; per-line seed = f(seed, speaker, text, instruct) unless the line carries one
+sample_rate: 44100             # output: mono 16-bit PCM (model rate 24 kHz, upsampled)
+peak_dbfs: -3.0
+language: English
+finetuned_language: Auto       # fine-tuned checkpoints: the upstream recipe trains with the language-neutral prefix
+batch_size: 1                  # 1 = every line is reproducible on its own; >1 is faster but takes depend on batch mates
+
+# How a line is synthesised. Per-line override: "mode" in the input JSON.
+#   icl       Base, reference audio + transcript in context (best timbre; delivery follows the reference clip)
+#   xvec      Base, speaker embedding only
+#   cv_xvec   CustomVoice weights driven by the Base speaker embedding of the references (clone + `instruct`)
+#   cv_icl    CustomVoice weights with the reference audio in context (experimental)
+#   custom    fine-tuned single-speaker checkpoint (`finetuned.<speaker>`), or a preset speaker of CustomVoice
+# MEASURED (docs/tts_qwen.md section 4): an instruction passed to the in-context clone changes nothing consistent;
+# the reference clip decides the delivery. So both defaults are `icl`, the instruction is NOT sent to the model, and
+# emotion is carried by the choice of reference clips (voice_refs_en(speaker, instruct) picks the high / low set).
+# Per line, "mode": "custom" uses a fine-tuned checkpoint where one exists: there the instruction does move the pitch
+# and pace (sad: works; excited: +7 semitones but the voice similarity drops), at a lower voice match than `icl`.
+default_mode: icl              # lines without an instruction
+instruct_mode: icl             # lines with an instruction
+instruct_on_base: false        # true = also pass the instruction text to the Base model (measured: no consistent effect)
+strip_tags: true               # inline tags like [excited] are READ ALOUD by the cloning model (measured 75-100 %): strip them
+
+gen:                           # generate_config.json of the released models unless noted
+  do_sample: true
+  top_k: 50
+  top_p: 1.0
+  temperature: 0.9
+  repetition_penalty: 1.05
+  subtalker_dosample: true
+  subtalker_top_k: 50
+  subtalker_top_p: 1.0
+  subtalker_temperature: 0.9
+codec_hz: 12.5                 # codec frames per second (token budget and runaway detection)
+
+ref:
+  icl_max_sec: 12.0            # the in-context reference is the first ref, cut to this length
+  xvec_max_refs: 3             # the speaker embedding is the mean over up to this many refs
+  min_sec: 2.0                 # below this the clone is unreliable -> warning in the result row
+
+sanity:                        # checked on the trimmed take; a failing take is re-rolled with seed+1
+  min_sec_per_word: 0.11       # faster than this = words swallowed
+  max_sec_per_word: 0.85       # slower than this (+ max_extra_sec, + pause_sec per "..." / "—") = babbling / runaway tail
+  max_extra_sec: 1.2
+  pause_sec: 0.4
+  min_rms_dbfs: -45.0
+  retries: 3
+
+fit:                           # Qwen3-TTS has no speed control: fitting = pitch-preserving atempo stretch only
+  tolerance_rel: 0.05
+  tolerance_abs: 0.08
+  stretch_min: 0.80            # duration ratio limits (0.8 = 20 % shorter)
+  stretch_max: 1.25
+  slow_down: true
+
+trim:
+  top_db: 38.0
+  pad_head_ms: 20
+  pad_tail_ms: 60
+
+# Emotion-matched reference clips (measured alternative to instructions, docs section 4d): the voice bank stores, per
+# speaker, clips ranked by arousal (pitch + level); an instruction containing one of these words picks that set.
+ref_style:
+  high: [excited, energetic, angry, furious, shout, shouting, yell, panic, panicked, surprised, shocked, cheerful, hyper, loud, retort]
+  low: [sad, whisper, whispering, quiet, soft, nervous, shy, timid, tired, gloomy, depressed, hesitant, calm, gentle, melancholy]
+
+voice_bank:                    # src/train/voice_bank.py --lang en (overrides of tts.voice_bank)
+  out_dir: ${paths.processed}/voices_en
+  lines: ${paths.processed}/anime/lines_en.jsonl
+  others_dir: ${paths.processed}/anime/dub_lines       # every dub line of an episode (guard against other voices)
+  stems: [vocals_en.wav]
+  lang: en
+  min_conf: 0.45
+  edge_pad_sec: 0.15           # Whisper word ends tend to be early; the guard to neighbouring lines stays 0.15 s
+  n_style: 3                   # refs per style set (high / low arousal)
+  speaker_overrides:           # halting speakers: join fragments across longer pauses, then shorten the pauses
+    Komi: {merge_gap_sec: 2.5, min_sec: 2.0, min_speech_ratio: 0.30, squeeze_pause_sec: 0.35}

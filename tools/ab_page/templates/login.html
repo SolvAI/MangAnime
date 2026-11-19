@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}A/B rating{% endblock %}
+{% block main %}
+<div class="card" style="max-width:520px;margin:40px auto">
+  <h2 style="margin-top:0">Who is rating?</h2>
+  <p class="mut">{{ n_pairs }} pairs. For each pair you see two clips, left and right, in random order, and choose the better one per criterion (or a tie). You can stop at any time and continue later under the same name.</p>
+  {% if error %}<div class="warnbox">{{ error }}</div>{% endif %}
+  <form method="post" action="/login" class="row">
+    <input type="text" name="rater" placeholder="your name" autofocus required maxlength="64" style="flex:1">
+    <button class="primary" type="submit">Start</button>
+  </form>
+  <p class="mut" style="margin-bottom:0">Criteria: {{ criteria|join(" · ") }}</p>
+</div>
+{% endblock %}

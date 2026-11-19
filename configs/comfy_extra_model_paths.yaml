@@ -1,0 +1,11 @@
+# Extra model search paths for the headless ComfyUI (weights downloaded by scripts/download_weights.py
+# and LoRAs trained by this project). The user's ComfyUI/models folder stays untouched.
+komi_poc:
+  base_path: /home/user/komi-poc-work/models/comfy
+  diffusion_models: diffusion_models
+  text_encoders: text_encoders
+  loras: loras
+  vae: vae
+  upscale_models: upscale_models
+  checkpoints: checkpoints
+  controlnet: controlnet

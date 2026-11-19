@@ -1,0 +1,126 @@
+# Anime audio stack: separation, ASR, speaker embeddings/clustering, BGM cue library.
+# Read through src/common/config.py as CFG.audio (every configs/*.yaml is namespaced under its file stem). See docs/audio.md.
+venv: ${paths.work}/venvs/audio
+
+# ------------------------------------------------------------------ separation (src/anime/audio_separate.py)
+separation:
+  library: audio-separator            # python-audio-separator, the library behind the UVR5_UI Space
+  model_dir: ${paths.models}/separation
+  model: mel_band_roformer_kim_ft2_bleedless_unwa.ckpt   # chosen model (see docs/audio.md); `--model` overrides
+  # candidates compared by src/anime/audio_sepcompare.py (key -> audio-separator model filename)
+  candidates:
+    melband_kim: vocals_mel_band_roformer.ckpt
+    melband_kim_ft2_bleedless: mel_band_roformer_kim_ft2_bleedless_unwa.ckpt
+    bs_roformer_viperx_1297: model_bs_roformer_ep_317_sdr_12.9755.ckpt
+    htdemucs_ft: htdemucs_ft.yaml
+  # checkpoints that are already on this machine (HF cache) -> symlinked under model_dir with the library's filename
+  local_weights:
+    vocals_mel_band_roformer.ckpt: ~/.cache/huggingface/hub/models--KimberleyJSN--melbandroformer/snapshots/*/MelBandRoformer.ckpt
+    mel_band_roformer_kim_ft2_bleedless_unwa.ckpt: ~/.cache/huggingface/hub/models--pcunwa--Kim-Mel-Band-Roformer-FT/snapshots/*/kimmel_unwa_ft2_bleedless.ckpt
+    mel_band_roformer_karaoke_becruily.ckpt: ~/.cache/huggingface/hub/models--becruily--mel-band-roformer-karaoke/snapshots/*/mel_band_roformer_karaoke_becruily.ckpt
+  segment_size: 256                   # Space default (only used when override_model_segment_size is true)
+  override_model_segment_size: false
+  overlap: 4                          # windows overlapping each sample (step = chunk/overlap). Space default is 8; 4 halves the
+                                      # runtime (viperx's own default); audio_sepcompare measures the 8-vs-4 difference
+  batch_size: 2
+  use_autocast: true
+  sample_rate: 44100
+  vram_gb: 5                          # VRAM budget (GB) = gpu_run.sh request AND hard cap of the process; env AUDIO_VRAM_GB
+                                      # overrides. If the model's own chunk does not fit, the next smaller segment is used:
+  segment_ladder: [512, 384, 256]     # dim_t values tried after the model default (801 = 8 s; 256 = 2.55 s) on CUDA OOM
+
+# ------------------------------------------------------------------ ASR (src/anime/audio_asr.py)
+asr:
+  model_dir: ${paths.models}/asr/faster-whisper-large-v3
+  language: ja
+  compute_type: float16               # used when the ASR budget is >= 6 GB (peak ~4.8 GB), otherwise:
+  compute_type_small: int8_float16    # ~3.1 GB peak (faster-whisper benchmark), negligible accuracy difference
+  beam_size: 5
+  vad_filter: true
+  vad_min_silence_ms: 400
+  vad_speech_pad_ms: 250
+  condition_on_previous_text: false   # avoids hallucination loops across music-only stretches
+  no_speech_threshold: 0.6
+  hotwords: "古見さん 古見硝子 只野くん 只野仁人 長名なじみ 山井恋 上理卑美子 中々思春 矢田野まける 片居誠 尾根峰ねね 尾鶏楓 成瀬詩守斗 伊旦高校"
+  vram_gb: 4                          # gpu_run.sh request for ASR; env AUDIO_ASR_VRAM_GB overrides (>= 6 -> float16)
+
+# ------------------------------------------------------------------ speaker embeddings (src/anime/audio_embed.py, src/anime/speakers.py)
+spk:
+  model_dir: ${paths.models}/spk
+  out_dir: ${paths.processed}/anime/spk
+  min_dur: 0.4                        # skip dialogue lines shorter than this (s)
+  pad: 0.10                           # padding on each side of every line (s)
+  pad_to: 1.0                         # short lines are padded symmetrically up to this length (s)
+  max_dur: 12.0                       # lines longer than this are centre-cropped (s)
+  vram_gb: 2                          # gpu_run.sh request + process cap for the speaker embedder
+  cluster:
+    method: agglomerative             # average linkage, cosine distance
+    core_min_dur: 1.2                 # only lines at least this long (and not overlapping another line) build clusters
+    min_cluster_size: 8               # smaller groups are dissolved; their lines go to the nearest kept centroid or -1
+    assign_min_cos: 0.35              # non-core / held-out lines below this cosine to every centroid get cluster -1
+    n_exemplars: 16
+
+# ------------------------------------------------------------------ BGM cue library (src/anime/audio_bgm.py, src/generate/bgm.py)
+bgm:
+  out_dir: ${paths.processed}/bgm
+  clap_model: laion/clap-htsat-unfused   # NOT laion/larger_clap_music: its HF checkpoint is degenerate (see docs/audio.md)
+  min_music_score: 0.12               # cues below this mean cosine to the music prompts AND losing to a non-music prompt are rejected
+  min_cue: 8.0
+  max_cue: 40.0
+  target_lufs: -20.0
+  peak_dbfs: -1.0
+  max_gain_db: 24.0                   # very quiet cues are not boosted beyond this (noise / separation residue)
+  music_floor_db: -45.0               # frame level (dBFS, mono) above which the instrumental stem counts as "sounding"
+  max_gap: 0.6                        # silence longer than this ends a music region (s)
+  max_dialogue_ratio: 0.85            # cues with more dialogue coverage than this are dropped
+  max_sung_ratio: 0.35                # vocal-stem activity not explained by dialogue subtitles (OP/ED/insert songs)
+  song_pad: 4.0                       # padding around `kind == "song"` subtitle spans (s)
+  vram_gb: 3                          # gpu_run.sh request + process cap for CLAP (AUDIO_BGM_DEVICE=cpu avoids the GPU)
+
+# ------------------------------------------------------------------ English dub (src/anime/audio_en.py, src/anime/speakers_en.py)
+# Same separation model / settings / embedder as the Japanese pass; only TRAIN episodes. See docs/tts_qwen.md.
+dub_en:
+  audio_lang: eng
+  spk_dir: ${paths.processed}/anime/spk_en
+  lines_out: ${paths.processed}/anime/lines_en.jsonl
+  asr_prompt: "Komi, Tadano, Najimi, Yamai, Agari, Nakanaka, Katai, Onemine, Otori, Yadano, Inaka, Shosuke, Itan High School."
+  lines:
+    split_gap_sec: 0.45        # a pause this long inside a Whisper segment starts a new dub line
+    sentence_gap_sec: 0.12     # ... or a sentence end followed by at least this pause
+    min_sentence_sec: 0.9      # ... or a sentence end once the line is this long (fast exchanges of two voices have
+                               #     no pause; the voice bank re-joins adjacent lines of one speaker anyway)
+    max_sec: 12.0
+    min_word_prob: 0.35        # lines whose mean word probability is below this are dropped (hallucinations on residue)
+  transfer:
+    min_overlap: 0.35          # share of the dub line covered by Japanese lines of ONE speaker to take that name
+    min_conf: 0.45
+    min_dominance: 0.6         # ... and that speaker must hold this share of all overlapping named speech
+    strong_conf: 0.6           # Japanese evidence at or above this confidence = a named voice cluster (not the text-only LLM)
+  group_names: [Classmates, Other]   # many voices under one name: transferred only, never a voice centroid
+  names:
+    core_min_dur: 1.2          # lines at least this long (>= 0.8 s of speech, not overlapping) build the name centroids
+    min_core_lines: 6          # a name needs this many core lines to get a centroid
+    iterations: 4              # centroid <-> label refinement rounds (k-means seeded by the transfer)
+    keep_margin: 0.08          # a transferred name is kept if its centroid is within this cosine of the best centroid ...
+    min_own_cos: 0.38          # ... and the line is at least this close to it
+    assign_min_cos: 0.45       # other lines (wrong / missing transfer, episodes 15-21) take the nearest name centroid
+    assign_margin: 0.06        # ... if it beats the runner-up by this margin; otherwise the line stays "Unknown"
+    group_override_cos: 0.55   # a line transferred as a group name is renamed only above this cosine
+    alias_cos: 0.80            # two name centroids closer than this are one voice: the smaller name is dropped
+    min_seed_share: 0.10       # a voice whose core lines are < 10 % transferred seeds is a catch-all: the name is dropped
+    llm_rename_conf: 0.7       # --llm-check: a voice whose text says "somebody else" this confidently loses its name
+  discover:                    # --discover: voices without a usable transferred seed (Komi, Otori, ...)
+    threshold: 0.6             # agglomerative cut (cosine distance) on the still-unnamed core lines
+    min_core_lines: 10
+    min_conf: 0.75             # LLM confidence that the cluster is one roster character ...
+    min_jp_share: 0.5          # ... or this share of its lines overlapping the Japanese voice cluster of that name
+    merge_cos: 0.55            # two clusters given the same new name merge only if their centroids agree
+    min_wps: 2.0               # clusters whose text density is outside this range are mistimed fragments of many voices
+    max_wps: 5.5
+    assign_min_cos: 0.50       # other unnamed lines join a discovered voice only this close ...
+    assign_margin: 0.08        # ... and this far ahead of the next centroid
+    fill_gap_sec: 3.0          # fragments between two lines of a discovered voice (halting speech) are filled in
+    fill_other_cos: 0.45       # ... unless they are this close to another voice
+  purity:
+    thresholds: [0.6, 0.76]    # agglomerative cuts (cosine distance) used for the cluster-purity report
+    min_cluster_size: 8

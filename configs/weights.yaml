@@ -1,0 +1,35 @@
+# Pinned model weights. `scripts/download_weights.py` fetches each entry once into models/ (gitignored),
+# verifies the sha256 against the Hub's LFS metadata and writes models/manifest.lock.json.
+# kind: file  -> single file  -> models/<target>/<basename>
+# kind: repo  -> snapshot     -> models/<target>/
+# kind: local -> already on this machine (reused, never modified); only existence (+size) is recorded.
+weights:
+  # ---- manga parsing
+  - {id: magiv3, kind: repo, repo: ragavsachdeva/magiv3, revision: 49c73a22, target: hf/magiv3, stage: m1}
+  - {id: paddleocr_vl_gguf, kind: file, repo: PaddlePaddle/PaddleOCR-VL-1.6-GGUF, revision: 511b0964, file: PaddleOCR-VL-1.6-GGUF.gguf, target: ocr, stage: m1}
+  - {id: paddleocr_vl_mmproj, kind: file, repo: PaddlePaddle/PaddleOCR-VL-1.6-GGUF, revision: 511b0964, file: PaddleOCR-VL-1.6-GGUF-mmproj.gguf, target: ocr, stage: m1}
+  # ---- video distill LoRAs (newer than the local v1 from 2025-08)
+  - {id: wan22_i2v_light_high, kind: file, repo: lightx2v/Wan2.2-Distill-Loras, revision: 57adea58, file: wan2.2_i2v_A14b_high_noise_lora_rank64_lightx2v_4step_1022.safetensors, target: comfy/loras, stage: m1}
+  - {id: wan22_i2v_light_low, kind: file, repo: lightx2v/Wan2.2-Distill-Loras, revision: 57adea58, file: wan2.2_i2v_A14b_low_noise_lora_rank64_lightx2v_4step_1022.safetensors, target: comfy/loras, stage: m1}
+  # ---- TTS + ASR
+  - {id: indextts25, kind: repo, repo: IndexTeam/IndexTTS-2.5, revision: c39ce5ba, target: tts/IndexTTS-2.5, stage: m1}
+  - {id: faster_whisper_large_v3, kind: repo, repo: Systran/faster-whisper-large-v3, revision: main, target: asr/faster-whisper-large-v3, stage: m1}
+  # ---- keyframes (Qwen-Image-Edit-2511)
+  - {id: qwen_vl_te, kind: file, repo: Comfy-Org/Qwen-Image_ComfyUI, revision: 1f12b17b, file: split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors, target: comfy/text_encoders, stage: m1}
+  - {id: qie2511_light4, kind: file, repo: lightx2v/Qwen-Image-Edit-2511-Lightning, revision: 107d238d, file: Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors, target: comfy/loras, stage: m1}
+  - {id: qie2511, kind: file, repo: Comfy-Org/Qwen-Image-Edit, revision: f68ace85, file: split_files/diffusion_models/qwen_image_edit_2511_fp8mixed.safetensors, target: comfy/diffusion_models, stage: m1}
+  # ---- training (local smoke test of the Wan LoRA; the HF job pulls these itself)
+  - {id: wan22_i2v_high_fp16, kind: file, repo: Comfy-Org/Wan_2.2_ComfyUI_Repackaged, revision: ee6f4a40, file: split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp16.safetensors, target: train/wan22, stage: m3}
+  - {id: wan22_i2v_low_fp16, kind: file, repo: Comfy-Org/Wan_2.2_ComfyUI_Repackaged, revision: ee6f4a40, file: split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp16.safetensors, target: train/wan22, stage: m3}
+  # ---- already on this machine (reused in place)
+  - {id: wan22_i2v_high_fp8, kind: local, path: "/path/to/disk/ComfyUI/models/diffusion_models/Wan2_2-I2V-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors"}
+  - {id: wan22_i2v_low_fp8, kind: local, path: "/path/to/disk/ComfyUI/models/diffusion_models/Wan2_2-I2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors"}
+  - {id: umt5_fp8, kind: local, path: "/path/to/disk/ComfyUI/models/clip/umt5_xxl_fp8_e4m3fn_scaled.safetensors"}
+  - {id: umt5_bf16_st, kind: local, path: "/path/to/disk/ComfyUI/models/clip/umt5-xxl-enc-bf16.safetensors"}
+  - {id: umt5_bf16_pth, kind: local, path: "/path/to/disk/InfiniteStream/Causal-Forcing/wan_models/Wan2.1-T2V-1.3B/models_t5_umt5-xxl-enc-bf16.pth"}
+  - {id: wan21_vae, kind: local, path: "/path/to/disk/ComfyUI/models/vae/wan_2.1_vae.safetensors"}
+  - {id: qwen_image_vae, kind: local, path: "/path/to/disk/ComfyUI/models/vae/qwen_image_vae.safetensors"}
+  - {id: qwen38_27b_q4, kind: local, path: "/home/user/komi-poc-work/models/llm/Qwen3.8-27B-UD-Q4_K_M.gguf"}
+  - {id: qwen38_27b_mmproj, kind: local, path: "/home/user/komi-poc-work/models/llm/mmproj-Qwen3.8-27B-Uncensored-f16.gguf"}
+  - {id: bge_m3, kind: local, path: "/home/user/.cache/huggingface/hub/models--BAAI--bge-m3"}
+  - {id: melband_roformer_kim, kind: local, path: "/home/user/.cache/huggingface/hub/models--KimberleyJSN--melbandroformer"}

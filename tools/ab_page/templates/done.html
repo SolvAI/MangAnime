@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}A/B rating: done{% endblock %}
+{% block head %}<span class="sp"></span><span class="mut">{{ rater }}</span><a href="/logout">switch rater</a>{% endblock %}
+{% block main %}
+<div class="card" style="max-width:520px;margin:40px auto">
+  <h2 style="margin-top:0">All done</h2>
+  <p>{{ rater }}, you rated {{ n_done }} of {{ n_pairs }} pairs. Thank you.</p>
+  <div class="row">
+    <a class="btn" href="/results">See results (un-blinds the experiment)</a>
+    {% if can_undo %}<form method="post" action="/undo"><button type="submit">Undo my last rating</button></form>{% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,135 @@
+{
+ "clip": {
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+   "type": "wan",
+   "device": "cpu"
+  }
+ },
+ "vae": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "wan_2.1_vae.safetensors"
+  }
+ },
+ "img": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "KEYFRAME.png"
+  }
+ },
+ "pos": {
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "clip",
+    0
+   ],
+   "text": "PROMPT"
+  }
+ },
+ "neg": {
+  "class_type": "CLIPTextEncode",
+  "inputs": {
+   "clip": [
+    "clip",
+    0
+   ],
+   "text": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
+  }
+ },
+ "i2v": {
+  "class_type": "WanImageToVideo",
+  "inputs": {
+   "positive": [
+    "pos",
+    0
+   ],
+   "negative": [
+    "neg",
+    0
+   ],
+   "vae": [
+    "vae",
+    0
+   ],
+   "width": 832,
+   "height": 480,
+   "length": 81,
+   "batch_size": 1,
+   "start_image": [
+    "img",
+    0
+   ]
+  }
+ },
+ "unet": {
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "Wan2_2-I2V-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors",
+   "weight_dtype": "default"
+  }
+ },
+ "lora0": {
+  "class_type": "LoraLoaderModelOnly",
+  "inputs": {
+   "model": [
+    "unet",
+    0
+   ],
+   "lora_name": "wan2.2_i2v_A14b_high_noise_lora_rank64_lightx2v_4step_1022.safetensors",
+   "strength_model": 1.0
+  }
+ },
+ "ms": {
+  "class_type": "ModelSamplingSD3",
+  "inputs": {
+   "model": [
+    "lora0",
+    0
+   ],
+   "shift": 5.0
+  }
+ },
+ "ks": {
+  "class_type": "KSamplerAdvanced",
+  "inputs": {
+   "model": [
+    "ms",
+    0
+   ],
+   "noise_seed": 0,
+   "steps": 4,
+   "cfg": 1.0,
+   "sampler_name": "euler",
+   "scheduler": "simple",
+   "positive": [
+    "i2v",
+    0
+   ],
+   "negative": [
+    "i2v",
+    1
+   ],
+   "add_noise": "enable",
+   "latent_image": [
+    "i2v",
+    2
+   ],
+   "start_at_step": 0,
+   "end_at_step": 2,
+   "return_with_leftover_noise": "enable"
+  }
+ },
+ "save": {
+  "class_type": "SaveLatent",
+  "inputs": {
+   "samples": [
+    "ks",
+    0
+   ],
+   "filename_prefix": "latents/SHOT"
+  }
+ }
+}

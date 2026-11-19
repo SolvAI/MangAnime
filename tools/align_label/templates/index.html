@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block body %}
+<main style="padding:14px;max-width:1100px;margin:0 auto">
+<p class="mut">Hand-align manga panels with anime shots. Automatic matches are pre-filled; what you confirm is written to <code>align/gold/epNN.jsonl</code>.</p>
+<div class="card" style="margin-bottom:14px">
+<table>
+<tr><th>episode</th><th>chapters</th><th>panels</th><th>shots</th><th>gold rows</th><th></th></tr>
+{% for e in episodes %}
+<tr>
+  <td>ep{{ "%02d"|format(e.episode) }}</td>
+  <td>{% if e.chapters %}{{ e.chapters[0] }}{% if e.chapters|length > 1 %}–{{ e.chapters[-1] }}{% endif %} <span class="mut">({{ e.origin }})</span>{% else %}<span class="mut">unknown: enter them on the page</span>{% endif %}</td>
+  <td>{{ e.n_panels }}</td><td>{{ e.n_shots }}</td><td>{{ e.n_gold }}</td>
+  <td><a class="btn" href="/ep/{{ e.episode }}">Label</a></td>
+</tr>
+{% endfor %}
+{% if not episodes %}<tr><td colspan="6" class="mut">No episodes yet: neither <code>queue.json</code> nor <code>shots.jsonl</code> lists any.</td></tr>{% endif %}
+</table>
+</div>
+<div class="card">
+<table>
+<tr><th>input</th><th>state</th><th>file</th></tr>
+{% for k, v in status.items() %}
+<tr><td>{{ k }}</td><td>{% if v.exists %}found{% if v.rows is not none %} · {{ v.rows }} rows{% endif %}{% else %}<span style="color:var(--warn)">missing</span>{% endif %}</td><td><code>{{ v.path }}</code></td></tr>
+{% endfor %}
+</table>
+</div>
+</main>
+{% endblock %}

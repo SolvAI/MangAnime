@@ -1,0 +1,61 @@
+# Training infrastructure settings (LoRA trainings: local cache/smoke + Hugging Face Jobs).
+# Read by src/train/*.py and infra/hf_jobs/{launch,monitor}.py. Hyper-parameters live in configs/train_*.toml
+# (musubi-tuner `--config_file` format). Nothing in here is secret.
+train_infra:
+  musubi:
+    repo: https://github.com/kohya-ss/musubi-tuner
+    commit: f8a1b03794a49239a3539015075f5123d6c07d66      # 2026-09-27, v0.3.6
+    dir: /home/user/komi-poc-work/third_party/musubi-tuner
+    venv: /home/user/komi-poc-work/venvs/musubi
+
+  hub:
+    cache_repo: your-hf-user/komi-poc-train-cache           # PRIVATE dataset repo: cache shards + job scripts/configs
+    lora_repo: your-hf-user/komi-poc-lora                   # PRIVATE model repo: LoRA checkpoints + training state
+
+  jobs:
+    # stock public image; the digest is recorded for reference (2025-08-06 build)
+    image: pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime
+    image_digest: sha256:417bd75df6365104c283ea4c1651fb3530d9eb5a4c2fafa51943cff2a94e6385
+    flavor: rtx-pro-6000
+    hf_bin: /home/user/.local/bin/hf                       # hf CLI 2.2.0 (the venvs carry older `hf` builds)
+    usd_per_hour:                                         # `hf jobs hardware`, read 2026-11-10
+      cpu-basic: 0.01
+      cpu-upgrade: 0.03
+      l40sx1: 1.80
+      a100-large: 2.50
+      rtx-pro-6000: 2.75
+      h200: 5.00
+
+  # Local weights (never modified). Trainer-loadable formats only: musubi cannot read ComfyUI fp8_scaled / fp8mixed files.
+  local_weights:
+    wan_vae: "/path/to/disk/ComfyUI/models/vae/wan_2.1_vae.safetensors"
+    wan_t5: "/path/to/disk/InfiniteStream/Causal-Forcing/wan_models/Wan2.1-T2V-1.3B/models_t5_umt5-xxl-enc-bf16.pth"
+    wan_dit_high: /path/to/disk/komi-poc-models/train/wan22/wan2.2_i2v_high_noise_14B_fp16.safetensors
+    wan_dit_low: /path/to/disk/komi-poc-models/train/wan22/wan2.2_i2v_low_noise_14B_fp16.safetensors
+    qwen_vae: "/path/to/disk/ComfyUI/models/vae/qwen_image_vae.safetensors"
+    qwen_te: /home/user/komi-poc-work/models/train/qwen/split_files/text_encoders/qwen_2.5_vl_7b.safetensors
+    qwen_dit: /home/user/komi-poc-work/models/train/qwen/split_files/diffusion_models/qwen_image_edit_2511_bf16.safetensors
+
+  # Base weights the HF job downloads itself (pinned revisions).
+  hub_weights:
+    wan_dit_high:
+      repo: Comfy-Org/Wan_2.2_ComfyUI_Repackaged
+      revision: ee6f4a40737a995bf5818954cfce6d59443b0f04
+      file: split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp16.safetensors
+    wan_dit_low:
+      repo: Comfy-Org/Wan_2.2_ComfyUI_Repackaged
+      revision: ee6f4a40737a995bf5818954cfce6d59443b0f04
+      file: split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp16.safetensors
+    qwen_dit:
+      repo: Comfy-Org/Qwen-Image-Edit_ComfyUI
+      revision: f68ace85e60b4a02a323e394253731947657b7d2
+      file: split_files/diffusion_models/qwen_image_edit_2511_bf16.safetensors
+
+  # Dataset contract (docs/training.md)
+  data:
+    wan_clips: /home/user/komi-poc-work/data/processed/train/wan/clips
+    wan_smoke: /home/user/komi-poc-work/data/processed/train/wan_smoke
+    kf_root: /home/user/komi-poc-work/data/processed/train/kf
+    kf_smoke: /home/user/komi-poc-work/data/processed/train/kf_smoke
+    trigger: komi_anime_style
+    train_episodes: [1, 21]                               # inclusive; 22-24 are held out and refused by the tooling

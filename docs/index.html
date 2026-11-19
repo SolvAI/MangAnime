@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MangAnime: from manga chapters to an anime episode</title>
+<meta name="description" content="An open research pipeline that turns manga chapters into a full anime episode on one GPU, measured sprint by sprint against the real adaptation.">
+<meta property="og:title" content="MangAnime: from manga chapters to an anime episode">
+<meta property="og:description" content="Open research pipeline, measured sprint by sprint against the real adaptation.">
+<meta property="og:image" content="https://solvai.github.io/MangAnime/media/contact_sprint5.jpg">
+<style>
+:root{--bg:#faf7f2;--panel:#ffffff;--ink:#1c1d22;--muted:#5d616b;--line:#e4dfd6;--accent:#5b3fc4;--accent-ink:#ffffff;--good:#0f8a63;--warn:#b4541a;--soft:#f1ecfb;--shadow:0 10px 30px rgba(40,30,80,.10)}
+@media (prefers-color-scheme:dark){:root{--bg:#111216;--panel:#1a1c22;--ink:#eceae6;--muted:#a3a7b1;--line:#2b2e37;--accent:#a590ff;--accent-ink:#14121f;--good:#4fd1a5;--warn:#f0a06a;--soft:#211d33;--shadow:0 10px 30px rgba(0,0,0,.45)}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+nav{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:18px;height:56px;overflow-x:auto;white-space:nowrap}
+nav b{font-size:18px;letter-spacing:.2px;margin-right:auto}
+nav a{color:var(--muted);text-decoration:none;font-size:15px}
+nav a:hover{color:var(--ink)}
+nav a.gh{color:var(--accent);font-weight:600}
+header{padding:64px 0 28px}
+h1{font-size:clamp(34px,5.4vw,60px);line-height:1.06;letter-spacing:-.02em;margin:0 0 18px;max-width:22ch}
+h1 em{font-style:normal;color:var(--accent)}
+.lead{font-size:clamp(18px,2.1vw,21px);color:var(--muted);max-width:62ch;margin:0 0 26px}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:36px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);text-decoration:none;font-weight:600;font-size:16px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn:hover{transform:translateY(-1px)}
+video,img.shot{width:100%;display:block;border-radius:14px;background:#0d0e11;box-shadow:var(--shadow)}
+.cap{color:var(--muted);font-size:14.5px;margin:10px 2px 0}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:34px 0 8px}
+.fact{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.fact b{display:block;font-size:26px;letter-spacing:-.01em}
+.fact span{color:var(--muted);font-size:14.5px}
+section{padding:54px 0;border-top:1px solid var(--line)}
+h2{font-size:clamp(26px,3.2vw,36px);letter-spacing:-.015em;margin:0 0 8px}
+.sub{color:var(--muted);max-width:70ch;margin:0 0 26px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+.card h3{margin:0 0 6px;font-size:19px}
+.card p{margin:0;color:var(--muted);font-size:15.5px}
+.stack>*+*{margin-top:26px}
+.tag{display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:var(--soft);border-radius:999px;padding:4px 10px;margin-bottom:10px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:15px}
+th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:700}
+tr:last-child td{border-bottom:0}
+td.best{font-weight:700;color:var(--good)}
+.note{border-left:4px solid var(--warn);background:var(--panel);border-radius:0 12px 12px 0;padding:14px 18px;margin-top:20px;font-size:16px}
+ol.finds{padding-left:20px;margin:0}
+ol.finds li{margin:0 0 12px}
+ol.finds b{color:var(--ink)}
+.support{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.support .card{display:flex;flex-direction:column;gap:10px}
+.support .btn{margin-top:auto;justify-content:center}
+.goal{font-size:30px;font-weight:800;letter-spacing:-.01em}
+footer{padding:36px 0 60px;border-top:1px solid var(--line);color:var(--muted);font-size:14.5px}
+@media (max-width:860px){.grid3,.support,.grid2{grid-template-columns:1fr}.facts{grid-template-columns:repeat(2,1fr)}header{padding-top:40px}}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <b>MangAnime</b>
+  <a href="#demos">Demos</a><a href="#sprints">Sprints</a><a href="#pipeline">Pipeline</a><a href="#results">Results</a><a href="#support">Support</a>
+  <a class="gh" href="https://github.com/SolvAI/MangAnime">GitHub ★</a>
+</div></nav>
+
+<header><div class="wrap">
+  <h1>Manga chapters in. <em>An anime episode out.</em></h1>
+  <p class="lead">An open research pipeline that reads manga, writes a screenplay, plans shots, draws, animates and voices a full 22-minute episode on one GPU, and scores every stage against the real adaptation of the same chapters.</p>
+  <div class="cta">
+    <a class="btn primary" href="https://github.com/SolvAI/MangAnime">★ Star on GitHub</a>
+    <a class="btn" href="#demos">Watch the demos</a>
+    <a class="btn" href="eval/">Sprint-by-sprint evaluation</a>
+    <a class="btn" href="#support">Support the project</a>
+  </div>
+  <video src="eval/media/sample_07.mp4" poster="eval/media/sample_07.jpg" autoplay muted loop playsinline controls></video>
+  <p class="cap">One moment, eight views: the manga panel, six generated versions from sprint 1 to sprint 5, and the shot of the real episode it is measured against.</p>
+  <div class="facts">
+    <div class="fact"><b>324 shots</b><span>in a 22-minute generated episode, the real episode's count</span></div>
+    <div class="fact"><b>1 GPU</b><span>a shared RTX 4090; about 6 hours of rendering per episode</span></div>
+    <div class="fact"><b>6 sprints</b><span>each one answers what the last evaluation found</span></div>
+    <div class="fact"><b>3 episodes</b><span>held out and never trained on, as the yardstick</span></div>
+  </div>
+</div></header>
+
+<section id="demos"><div class="wrap">
+  <span class="tag">Demos</span>
+  <h2>Excerpts of the sprint 5 episode</h2>
+  <p class="sub">Generated from held-out manga chapters. Silent, with the script as subtitles: the research build's voices are conditioned on the official dub and its music comes from the show, so neither is published.</p>
+  <div class="grid3">
+    <div><video src="media/reel_opening.mp4" poster="media/reel_opening.jpg" controls muted loop playsinline preload="none"></video><p class="cap">Opening: a classroom, a narrator, three people who cannot say good morning. 32 s.</p></div>
+    <div><video src="media/reel_valentine_morning.mp4" poster="media/reel_valentine_morning.jpg" controls muted loop playsinline preload="none"></video><p class="cap">Valentine's morning: an empty shoe locker, an empty desk, an entrance. 29 s.</p></div>
+    <div><video src="media/reel_friend_chocolate.mp4" poster="media/reel_friend_chocolate.jpg" controls muted loop playsinline preload="none"></video><p class="cap">The park at dusk: "it's a friend chocolate". 37 s.</p></div>
+  </div>
+  <p class="cap" style="margin-top:22px"><img class="shot" src="media/contact_sprint5.jpg" alt="Forty-eight stills across the 22-minute sprint 5 episode" loading="lazy"></p>
+  <p class="cap">Forty-eight stills, one every 28 seconds of the episode.</p>
+</div></section>
+
+<section id="sprints"><div class="wrap">
+  <span class="tag">Evolution</span>
+  <h2>The same shot, sprint after sprint</h2>
+  <p class="sub">Each grid shows the manga panel, the generated shot of every sprint, and the real anime shot that adapts the same moment. Twelve of them, with notes, in the <a href="eval/">evaluation</a>.</p>
+  <div class="stack">
+    <div><video src="eval/media/sample_01.mp4" poster="eval/media/sample_01.jpg" controls muted loop playsinline preload="none"></video><p class="cap"><b>Who is in the panel?</b> Sprints 1 and 2 draw the wrong girl. From sprint 3, a vision model reads the chapter with character cards and the cast is right.</p></div>
+    <div><video src="eval/media/sample_04.mp4" poster="eval/media/sample_04.jpg" controls muted loop playsinline preload="none"></video><p class="cap"><b>Framing.</b> Sprint 4 drew this close-up as a boy at a desk in a wide room. Sprint 5 crops finished frames to shot sizes measured on the show.</p></div>
+    <div><video src="eval/media/sample_03.mp4" poster="eval/media/sample_03.jpg" controls muted loop playsinline preload="none"></video><p class="cap"><b>Staging.</b> Sprint 5 looks past one character's shoulder at the other, close to how the real shot is staged.</p></div>
+  </div>
+  <div class="cta" style="margin:26px 0 0"><a class="btn primary" href="eval/">All twelve samples and the numbers →</a></div>
+</div></section>
+
+<section id="pipeline"><div class="wrap">
+  <span class="tag">How it works</span>
+  <h2>Twelve stages, each one checked</h2>
+  <p class="sub">Language models read, write and direct; an image model draws first frames from reference pictures; a video model animates them; vision models check every frame and clip. Targets such as shot length, shot sizes and camera angles are measured on the training episodes.</p>
+  <img class="shot" src="media/pipeline.svg" alt="Pipeline diagram: manga chapter, read, screenplay, shot plan, wardrobe and voices, editor and camera pass, first frames, checks, clips, all-ages screen, mix and assembly, evaluation" style="background:#f6f7f9">
+  <div class="grid2" style="margin-top:26px">
+    <div class="card"><h3>What the sprints found</h3>
+      <ol class="finds">
+        <li><b>Colourised panels animate, but they are still manga.</b> FVD 470 against the real episode.</li>
+        <li><b>A video LoRA can hurt.</b> A community anime LoRA doubled brightness flicker; the base model won.</li>
+        <li><b>The bottleneck was reading and directing.</b> Cast accuracy on hand-labelled panels went from 61 % to 100 % once a vision model read the chapter with character cards.</li>
+        <li><b>Reference-drawn frames fix cast and continuity, and lose the look.</b> Scene continuity reached the real episode's level while FVD rose from 346 to 514.</li>
+        <li><b>Half of "the look" was framing and frame rate.</b> Cropping to measured shot sizes and playing at 16 fps brought FVD back to 390.</li>
+      </ol></div>
+    <div class="card"><h3>Sprint 6, in progress</h3>
+      <p style="margin-bottom:14px">Blind raters named stock-looking sets, costume details and flat staging first. The next cut shows the painter the school's real rooms, reads uniforms off the show's own character pictures, and adds a camera pass. In a blind test on 24 shots the new frame was closer to the show in 21 of 23 decided pairs.</p>
+      <img class="shot" src="media/next_camera_pass.jpg" alt="Sprint 5 frames beside sprint 6 test frames of the same shots" loading="lazy">
+      <p class="cap">Left: sprint 5. Right: the same shot in the sprint 6 test.</p></div>
+  </div>
+</div></section>
+
+<section id="results"><div class="wrap">
+  <span class="tag">Results</span>
+  <h2>Measured against the real episode</h2>
+  <p class="sub">A full episode from four held-out manga chapters, compared with the real episode that adapts them.</p>
+  <div class="tablewrap"><table>
+    <tr><th></th><th>Sprint 1</th><th>Sprint 2b</th><th>Sprint 3</th><th>Sprint 4</th><th>Sprint 5</th><th>Real episode</th></tr>
+    <tr><td>FVD against the real episode (lower is closer)</td><td>470</td><td>326–333</td><td>346</td><td>514</td><td class="best">390</td><td>321 (floor)</td></tr>
+    <tr><td>Cuts that stay in the same scene</td><td>—</td><td>53 %</td><td>76 %</td><td>94 %</td><td class="best">92 %</td><td>91 %</td></tr>
+    <tr><td>Continuity errors per 100 cuts</td><td>—</td><td>7.1</td><td>10.0</td><td>1.6</td><td class="best">2.3</td><td>1.2</td></tr>
+    <tr><td>First frames accepted by the cast check</td><td>—</td><td>—</td><td>157 / 286</td><td>284 / 286</td><td class="best">316 / 316</td><td></td></tr>
+    <tr><td>Mean optical flow</td><td>—</td><td>—</td><td>—</td><td>0.09</td><td class="best">0.33</td><td>0.73</td></tr>
+    <tr><td>Blind A/B, clip against its animatic</td><td>201 : 86</td><td>212 : 94</td><td>—</td><td>276 : 9</td><td class="best">289 : 15</td><td></td></tr>
+  </table></div>
+  <div class="note"><b>Against the real episode nothing is won yet.</b> Two independent blind raters picked out the generated side in 160 of 160 judgements and preferred the real frame or clip in about 33 of 40 pairs. The raters here are an automatic vision judge and blind AI raters; a human has rated 6 pairs so far. Definitions, caveats and every number: <a href="eval/">evaluation</a>.</div>
+</div></section>
+
+<section id="support"><div class="wrap">
+  <span class="tag">Support</span>
+  <h2>Help it go further</h2>
+  <p class="sub">MangAnime is built and run by one person on one shared 24 GB card: the image, video and voice models take turns in memory, and one episode render blocks everything else for six hours.</p>
+  <div class="support">
+    <div class="card"><h3>Star the repository</h3><p>Free, and it is how other people find the project.</p><a class="btn primary" href="https://github.com/SolvAI/MangAnime">★ Star MangAnime</a></div>
+    <div class="card"><h3>Fund the next GPU</h3><div class="goal">US$7,000</div><p>One NVIDIA RTX PRO 5000 (48 GB): all three models loaded together, local fine-tuning, rendering and evaluation side by side. The fundraiser page is being set up.</p><a class="btn" href="https://github.com/SolvAI/MangAnime/blob/main/SUPPORT.md">What it would change</a></div>
+    <div class="card"><h3>Sponsor or collaborate</h3><p>Studios, labs and individuals who want to sponsor the work, lend compute or collaborate on evaluation.</p><a class="btn" href="https://github.com/SolvAI/MangAnime/discussions">Open a discussion</a></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <p>Independent fan-made research. Not affiliated with or endorsed by the rights holders of any work it was tested on. No episodes, manga, audio or model weights are distributed; the videos on this site are short, silent evaluation excerpts. Rights holders: see the <a href="https://github.com/SolvAI/MangAnime/blob/main/NOTICE.md">notice</a> for removal requests.</p>
+  <p>Code under the MIT licence · <a href="https://github.com/SolvAI/MangAnime">github.com/SolvAI/MangAnime</a></p>
+</div></footer>
+</body>
+</html>

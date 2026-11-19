@@ -1,0 +1,242 @@
+# TTS / voice workstream config. src/common/config.py namespaces this file under its stem:
+#   CFG.tts.<key>  (engine, model_dir, emotion, fit, ...) ; CFG.tts.voice_bank.* ; CFG.tts.voice_metrics.*
+# Code: src/generate/tts.py, src/train/voice_bank.py, src/eval/voice_metrics.py. Docs: docs/tts.md
+engine: indextts2.5
+venv_python: ${paths.work}/venvs/tts/bin/python      # the TTS stack has its own venv (D-009)
+code_dir: ${paths.work}/third_party/index-tts
+code_commit: d9e41aac89fd00b3d71497fddb287b7f24613712   # pinned (2026-09-30)
+model_dir: ${paths.models}/tts/IndexTTS-2.5
+hf_cache: ${paths.models}/tts/hf_cache               # every auxiliary download goes under models/tts/
+cache_dir: ${paths.cache}/tts                        # content-hash cache of finished utterances
+ref_cache_dir: ${paths.cache}/tts/refs               # prepared (concatenated) speaker prompts
+vram_gb: 8                                           # admission size for scripts/gpu_run.sh
+offline: true                                        # HF_HUB_OFFLINE once the auxiliary models exist
+use_bf16: true
+seed: 20261110                                       # base seed; per-line seed = f(seed, line content)
+sample_rate: 44100                                   # output: mono, 16-bit PCM
+peak_dbfs: -3.0
+# --- speaker prompt -------------------------------------------------------------------------
+ref:
+  mode: concat            # concat = join the first refs up to max_sec | first = only ref_wavs[0]
+  max_sec: 12.0           # IndexTTS truncates the prompt at 15 s
+  min_sec: 2.0            # below this the clone is unreliable -> warning in the result row
+  gap_ms: 250
+# --- sampling (IndexTTS defaults unless noted) ----------------------------------------------
+gen:
+  do_sample: true
+  top_p: 0.8
+  top_k: 30
+  temperature: 0.8
+  num_beams: 3
+  repetition_penalty: 10.0
+  length_penalty: 0.0
+  max_text_tokens_per_segment: 120
+mel_tokens_per_sec: 50.07           # 22050 / 256 / 1.72 (codes per second of audio)
+# --- emotion ----------------------------------------------------------------------------------
+# vector order: [happy, angry, sad, afraid, disgusted, melancholic, surprised, calm]
+emotion:
+  strength: 0.65          # global scale on label vectors (higher = more emotion, less timbre fidelity)
+  max_sum: 0.8            # IndexTTS rule: the vector sum must stay <= 0.8
+  apply_bias: true        # IndexTTS per-dimension bias (de-emphasises surprised/calm)
+  labels:
+    neutral: null
+    normal: null
+    none: null
+    calm:        [0, 0, 0, 0, 0, 0, 0, 1.0]
+    deadpan:     [0, 0, 0, 0, 0, 0.15, 0, 1.0]
+    flat:        [0, 0, 0, 0, 0, 0.15, 0, 1.0]
+    serious:     [0, 0.15, 0, 0, 0, 0, 0, 0.8]
+    determined:  [0.2, 0.25, 0, 0, 0, 0, 0, 0.5]
+    gentle:      [0.35, 0, 0, 0, 0, 0, 0, 0.6]
+    kind:        [0.35, 0, 0, 0, 0, 0, 0, 0.6]
+    relieved:    [0.5, 0, 0, 0, 0, 0, 0, 0.5]
+    happy:       [1.0, 0, 0, 0, 0, 0, 0, 0]
+    joyful:      [1.0, 0, 0, 0, 0, 0, 0.1, 0]
+    excited:     [0.8, 0, 0, 0, 0, 0, 0.4, 0]
+    playful:     [0.8, 0, 0, 0, 0, 0, 0.2, 0]
+    teasing:     [0.7, 0, 0, 0, 0.1, 0, 0.2, 0]
+    smug:        [0.6, 0, 0, 0, 0.2, 0, 0, 0.2]
+    proud:       [0.6, 0.1, 0, 0, 0, 0, 0, 0.3]
+    angry:       [0, 1.0, 0, 0, 0, 0, 0, 0]
+    furious:     [0, 1.0, 0, 0, 0.2, 0, 0, 0]
+    annoyed:     [0, 0.55, 0, 0, 0.35, 0, 0, 0]
+    irritated:   [0, 0.55, 0, 0, 0.35, 0, 0, 0]
+    shouting:    [0, 0.6, 0, 0, 0, 0, 0.5, 0]
+    retort:      [0, 0.45, 0, 0, 0, 0, 0.6, 0]      # tsukkomi
+    tsukkomi:    [0, 0.45, 0, 0, 0, 0, 0.6, 0]
+    sad:         [0, 0, 1.0, 0, 0, 0, 0, 0]
+    crying:      [0, 0, 1.0, 0.2, 0, 0, 0, 0]
+    disappointed: [0, 0, 0.5, 0, 0, 0.5, 0, 0]
+    melancholic: [0, 0, 0, 0, 0, 1.0, 0, 0]
+    depressed:   [0, 0, 0.3, 0, 0, 1.0, 0, 0]
+    gloomy:      [0, 0, 0.3, 0, 0, 1.0, 0, 0]
+    lonely:      [0, 0, 0.5, 0, 0, 0.5, 0, 0]
+    tired:       [0, 0, 0, 0, 0, 0.7, 0, 0.3]
+    scared:      [0, 0, 0, 1.0, 0, 0, 0, 0]
+    afraid:      [0, 0, 0, 1.0, 0, 0, 0, 0]
+    terrified:   [0, 0, 0, 1.0, 0, 0, 0.3, 0]
+    panicked:    [0, 0, 0, 0.7, 0, 0, 0.5, 0]
+    flustered:   [0.1, 0, 0, 0.5, 0, 0, 0.5, 0]
+    nervous:     [0, 0, 0, 0.6, 0, 0, 0.1, 0.3]
+    anxious:     [0, 0, 0.1, 0.6, 0, 0, 0, 0.2]
+    worried:     [0, 0, 0.3, 0.5, 0, 0, 0, 0.2]
+    shy:         [0.1, 0, 0, 0.35, 0, 0.15, 0, 0.4]
+    embarrassed: [0.1, 0, 0, 0.45, 0, 0, 0.35, 0.1]
+    awkward:     [0, 0, 0, 0.35, 0, 0.15, 0.1, 0.4]
+    hesitant:    [0, 0, 0, 0.35, 0, 0.2, 0, 0.45]
+    apologetic:  [0, 0, 0.45, 0.25, 0, 0, 0, 0.3]
+    surprised:   [0, 0, 0, 0, 0, 0, 1.0, 0]
+    shocked:     [0, 0, 0, 0.3, 0, 0, 1.0, 0]
+    confused:    [0, 0, 0, 0.15, 0, 0, 0.6, 0.25]
+    curious:     [0.25, 0, 0, 0, 0, 0, 0.5, 0.25]
+    disgusted:   [0, 0, 0, 0, 1.0, 0, 0, 0]
+    whisper:     [0, 0, 0, 0.15, 0, 0.15, 0, 0.7]
+    thinking:    [0, 0, 0, 0, 0, 0.2, 0, 0.8]
+    narration:   [0, 0, 0, 0, 0, 0, 0, 0.9]
+  aliases:                # free-text labels from the director -> canonical label
+    fear: scared
+    fearful: scared
+    frightened: scared
+    joy: happy
+    cheerful: happy
+    glad: happy
+    delighted: happy
+    smiling: happy
+    mad: angry
+    upset: annoyed
+    frustrated: annoyed
+    panic: panicked
+    panicking: panicked
+    anxiety: anxious
+    shock: shocked
+    startled: surprised
+    surprise: surprised
+    amazed: surprised
+    astonished: shocked
+    bashful: shy
+    timid: shy
+    blushing: embarrassed
+    sorrowful: sad
+    tearful: crying
+    sobbing: crying
+    monotone: deadpan
+    matter-of-fact: deadpan
+    stoic: deadpan
+    composed: calm
+    relaxed: calm
+    soft: gentle
+    warm: gentle
+    tender: gentle
+    relief: relieved
+    puzzled: confused
+    bewildered: confused
+    resolute: determined
+    stern: serious
+    yelling: shouting
+    screaming: shouting
+    whispering: whisper
+    pensive: thinking
+    thoughtful: thinking
+    narrator: narration
+    disgust: disgusted
+    exhausted: tired
+    sleepy: tired
+    sulking: annoyed
+    pouting: annoyed
+    mischievous: playful
+    energetic: excited
+    hyper: excited
+# --- duration fitting ---------------------------------------------------------------------------
+fit:
+  tolerance_rel: 0.05     # |dur - target| <= max(tolerance_rel * target, tolerance_abs) counts as a fit
+  tolerance_abs: 0.08
+  speed_min: 0.75         # IndexTTS duration_factor range we allow (<1 = faster, >1 = slower)
+  speed_max: 1.30
+  stretch_min: 0.80       # extra ffmpeg atempo stretch of the *duration* (0.8 = 20 % shorter)
+  stretch_max: 1.25
+  slow_down: true         # false = never lengthen a line that is shorter than target_dur (pad downstream)
+# --- trimming / sanity ---------------------------------------------------------------------------
+trim:
+  top_db: 38.0
+  pad_head_ms: 20
+  pad_tail_ms: 60
+sanity:                     # checked on the native take (speed 1.0, trimmed)
+  min_sec_per_mora: 0.045   # shorter than mora * this = swallowed text
+  max_sec_per_mora: 0.35    # longer than mora * this + max_extra_sec (+ pause_sec per "…") = babbling / runaway tail
+  max_extra_sec: 1.5
+  pause_sec: 0.5
+  min_rms_dbfs: -45.0
+  retries: 3                # re-rolls (seed+1, ...) when a take fails the sanity check
+# --- Japanese front-end ---------------------------------------------------------------------------
+# Readings forced before synthesis (names the model would otherwise read with the common kanji reading).
+# Longest match first. Extend freely; values must be kana.
+lexicon_ja:
+  古見硝子: こみしょうこ
+  古見: こみ
+  硝子: しょうこ
+  只野仁人: ただのひとひと
+  只野: ただの
+  仁人: ひとひと
+  長名: おさな
+  山井恋: やまいれん
+  山井: やまい
+  上理卑美子: あがりひみこ
+  上理: あがり
+  卑美子: ひみこ
+  中々思春: なかなかおもはる
+  中々: なかなか
+  思春: おもはる
+  矢田野: やだの
+  片居誠: かたいまこと
+  片居: かたい
+  尾根峰: おねみね
+  尾鶏: おとり
+  万場木: まんばぎ
+  留美子: るみこ
+  成瀬: なるせ
+  詩守斗: しすと
+  米谷: こめたに
+  園田: そのだ
+  忍野: しのびの
+  地洗井: ちあらい
+  笑介: しょうすけ
+  秀子: しゅうこ
+  将賀: まさよし
+  伊旦高校: いたんこうこう
+  伊旦: いたん
+
+voice_bank:
+  out_dir: ${paths.processed}/voices
+  lines: ${paths.processed}/anime/lines_named.jsonl
+  audio_dir: ${paths.interim}/anime                  # epNN/vocals.wav (preferred) or epNN/audio_jpn.wav
+  stems: [vocals.wav, audio_jpn.wav]                 # first existing file wins
+  min_conf: 0.45                # LLM-only speaker labels carry conf 0.5; wrong labels are removed by the consistency filter
+  min_sec: 2.5
+  max_sec: 12.0
+  ideal_sec: [5.0, 10.0]
+  merge_gap_sec: 0.8          # merge adjacent lines of the same speaker when the gap is at most this
+  guard_sec: 0.15             # a candidate must not come closer than this to another speaker's line
+  edge_pad_sec: 0.08          # padding added around subtitle times before trimming on energy
+  max_candidates: 60          # per speaker, embedded and scored
+  n_refs: 8                   # written per speaker
+  n_default: 3                # refs listed in default_refs (what tts.py concatenates)
+  min_consistency: 0.45       # cosine to the speaker centroid; below = probably a wrong label / overlap
+  min_snr_db: 12.0            # speech-vs-floor proxy (P95 - P10 frame level) on separated vocals; below = bleed
+  min_snr_db_mix: 4.0         # same proxy when only the full mix exists (music raises the floor): fallback mode
+  min_speech_ratio: 0.55
+  diversity_sec: 20.0         # two refs from the same episode must be at least this far apart
+  weights: {consistency: 0.45, snr: 0.25, duration: 0.15, speech_ratio: 0.10, conf: 0.05}
+
+voice_metrics:
+  spk_model: speechbrain/spkrec-ecapa-voxceleb       # non-gated; cached under tts.hf_cache
+  spk_model_dir: ${paths.models}/tts/spkrec-ecapa-voxceleb
+  asr_model_dir: ${paths.models}/asr/faster-whisper-large-v3
+  asr_compute_type: float16
+  asr_beam: 5
+  asr_initial_prompt: null    # e.g. "古見さん、只野くん、長名なじみ。" biases name spelling (can hallucinate on tiny clips)
+  vram_gb: 6
+  # evidence thresholds (flags for the judge, not verdicts)
+  flag_sim_below: 0.35
+  flag_cer_above: 0.25
+  flag_wer_above: 0.25        # English rows (WER)
+  flag_dur_rel_above: 0.10

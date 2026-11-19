@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Review: {{ src }}{% endblock %}
+{% block head %}
+<span>{{ src }}</span>
+{% if counts %}
+<a class="btn {{ 'on' if show == 'all' }}" href="/s/{{ src }}?show=all">all {{ counts.all }}</a>
+<a class="btn {{ 'on' if show == 'todo' }}" href="/s/{{ src }}?show=todo">not reviewed {{ counts.todo }}</a>
+<a class="btn {{ 'on' if show == 'low' }}" href="/s/{{ src }}?show=low">low confidence {{ counts.low }}</a>
+{% endif %}
+<span class="sp"></span><span class="state mut" id="state"></span>
+{% endblock %}
+{% block main %}
+{% if missing %}<div class="warnbox">File not found yet: <code>{{ path }}</code>. This page fills in once the clustering stage has written it.</div>{% endif %}
+{% if error %}<div class="warnbox">Could not read <code>{{ path }}</code>: {{ error }}</div>{% endif %}
+{% if not missing and not error %}
+<p class="mut">Type a name and press <b>Enter</b> (jumps to the next cluster). Saved to <code>{{ override_path }}</code>. Flagged = confidence below {{ low_conf }} or no automatic name.</p>
+<datalist id="names">{% for n in names %}<option value="{{ n }}">{% endfor %}</datalist>
+{% for r in rows %}
+<div class="card {{ 'reviewed' if r.reviewed }} {{ 'junk' if r.junk }} {{ 'low' if r.low }}" data-id="{{ r.id }}" data-auto="{{ r.auto_name or '' }}">
+  <div class="head">
+    <b>#{{ r.id }}</b>
+    <input type="text" list="names" value="{{ r.name or '' }}" placeholder="name" aria-label="name of cluster {{ r.id }}">
+    <button class="primary" data-act="save">Save</button>
+    {% if r.auto_name %}<button data-act="confirm" title="keep the automatic name">Confirm "{{ r.auto_name }}"</button>{% endif %}
+    <button data-act="junk" title="not a character / not a voice">Junk</button>
+    <button data-act="clear" title="remove my correction">Clear</button>
+    <span class="badge {{ 'warn' if r.low }}">conf {{ "%.2f"|format(r.confidence) if r.confidence is not none else "?" }}</span>
+    <span class="badge">size {{ r.size }}</span>
+    <span class="badge">auto: {{ r.auto_name or "none" }}</span>
+    <span class="badge ok rv" {% if not r.reviewed %}hidden{% endif %}>reviewed{% if r.override %}: {{ r.override }}{% endif %}</span>
+    {% for k, v in r.extra.items() %}<span class="badge" title="{{ v }}">{{ k }}: {{ v|string|truncate(60) }}</span>{% endfor %}
+  </div>
+  <div class="ex">
+    {% for e in r.exemplars %}
+      {% if not e.ok %}<div class="missing">missing file</div>
+      {% elif e.kind == "image" %}<a href="/media/{{ src }}/{{ r.idx }}/{{ e.i }}" target="_blank"><img loading="lazy" src="/media/{{ src }}/{{ r.idx }}/{{ e.i }}?w=256" alt="exemplar"></a>
+      {% else %}<div class="aud"><audio controls preload="none" src="/media/{{ src }}/{{ r.idx }}/{{ e.i }}"></audio>{% if e.text %}<div>{{ e.text }}</div>{% endif %}</div>{% endif %}
+    {% endfor %}
+    {% if not r.exemplars %}<span class="mut">no exemplars</span>{% endif %}
+  </div>
+</div>
+{% endfor %}
+{% if not rows %}<p class="mut">Nothing to show in this view.</p>{% endif %}
+<script>
+(function(){
+  const src = {{ src|tojson }}, JUNK = {{ junk|tojson }}, state = document.getElementById('state');
+  async function save(card, name){
+    const r = await fetch('/api/' + src + '/name', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id: card.dataset.id, name: name})});
+    const j = await r.json();
+    if(!j.ok){ state.textContent = 'error: ' + (j.error || r.status); return false; }
+    const rv = card.querySelector('.rv');
+    card.classList.toggle('reviewed', j.override != null);
+    card.classList.toggle('junk', j.override === JUNK);
+    rv.hidden = j.override == null; rv.textContent = j.override != null ? 'reviewed: ' + j.override : '';
+    if(j.override == null) card.querySelector('input').value = card.dataset.auto;
+    state.textContent = 'saved ' + new Date().toLocaleTimeString() + ' · ' + j.n_overrides + ' corrections';
+    return true;
+  }
+  function next(card){ let n = card.nextElementSibling; while(n && !n.classList.contains('card')) n = n.nextElementSibling; if(n){ const i = n.querySelector('input'); i.focus(); i.select(); n.scrollIntoView({block:'center', behavior:'smooth'}); } }
+  document.querySelectorAll('.card[data-id]').forEach(card => {
+    const inp = card.querySelector('input');
+    inp.addEventListener('keydown', async e => { if(e.key === 'Enter'){ e.preventDefault(); if(await save(card, inp.value)) next(card); } });
+    card.querySelectorAll('button[data-act]').forEach(b => b.addEventListener('click', async () => {
+      const a = b.dataset.act;
+      if(a === 'save') await save(card, inp.value);
+      else if(a === 'confirm'){ inp.value = card.dataset.auto; await save(card, card.dataset.auto); }
+      else if(a === 'junk'){ inp.value = JUNK; await save(card, JUNK); }
+      else if(a === 'clear') await save(card, null);
+    }));
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}

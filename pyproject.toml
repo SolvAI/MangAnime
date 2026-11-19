@@ -1,0 +1,67 @@
+[project]
+name = "manganime"
+version = "0.1.0"
+description = "Manga -> anime episode pipeline: research proof-of-concept"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "torch==2.8.0",
+  "torchvision==0.23.0",
+  "torchaudio==2.8.0",
+  "transformers>=4.56,<5",
+  "tokenizers",
+  "accelerate",
+  "safetensors",
+  "sentence-transformers>=3",
+  "einops",
+  "timm",
+  "shapely",
+  "numpy<2.3",
+  "scipy",
+  "scikit-learn",
+  "pillow",
+  "opencv-python-headless",
+  "av",
+  "pysubs2",
+  "duckdb",
+  "typer",
+  "omegaconf",
+  "pydantic>=2",
+  "jsonschema",
+  "httpx",
+  "tenacity",
+  "python-dotenv",
+  "tqdm",
+  "rich",
+  "fastapi",
+  "uvicorn",
+  "jinja2",
+  "python-multipart",
+  "pymupdf",
+  "huggingface_hub",
+  "onnxruntime-gpu",
+  "dghs-imgutils",
+  "soundfile",
+  "librosa",
+  "pyloudnorm",
+  "matplotlib",
+  "pytest",
+  "websocket-client",
+  "pyyaml",
+]
+
+[tool.uv]
+package = false
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }
+torchaudio = { index = "pytorch-cu128" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

@@ -1,0 +1,56 @@
+# secrets
+.env
+.env.*
+# media, data, weights, runs (never commit)
+data
+data/
+models
+models/
+runs
+runs/
+*.mkv
+*.mp4
+*.webm
+*.mov
+*.avi
+*.wav
+*.flac
+*.mp3
+*.ogg
+*.m4a
+*.opus
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.cbz
+*.zip
+*.safetensors
+*.gguf
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.bin
+*.npy
+*.npz
+*.parquet
+*.duckdb
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
+mlruns/
+# misc
+.claude/
+*.log
+
+# user prompt notes (may contain credentials)
+*_userprompt.txt
+
+# the public site and evaluation media are the only media in the repository (silent, short, downscaled)
+!docs/media/*
+!docs/eval/media/*

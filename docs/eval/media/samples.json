@@ -1,0 +1,254 @@
+[
+ {
+  "name": "sample_01",
+  "real_shot": 9,
+  "chapter": 114,
+  "seconds": 3.0,
+  "shots": {
+   "ep22": "c114_s014",
+   "ep22_v2": "c114_s014",
+   "ep22_v2b": "c114_s014",
+   "ep22_v3": "c114_s012",
+   "ep22_v3b": "c114_s012",
+   "ep22_v3e": "c114_s011"
+  },
+  "line": "R—",
+  "shows": "Nakanaka stares wide-eyed and red-faced at Agari's radiant smile.",
+  "confidence": 1.0,
+  "mb": {
+   "mp4": 0.38,
+   "webp": 0.52
+  }
+ },
+ {
+  "name": "sample_02",
+  "real_shot": 16,
+  "chapter": 114,
+  "seconds": 6.0,
+  "shots": {
+   "ep22": "c114_s032",
+   "ep22_v2": "c114_s032",
+   "ep22_v2b": "c114_s032",
+   "ep22_v3": "c114_s025",
+   "ep22_v3b": "c114_s025",
+   "ep22_v3e": "c114_s021"
+  },
+  "line": "I'm gonna say 'good morning' to everyone today for sure!",
+  "shows": "Katai stands in the doorway, enormous and scowling, students shrinking back.",
+  "confidence": 0.97,
+  "mb": {
+   "mp4": 0.74,
+   "webp": 1.03
+  }
+ },
+ {
+  "name": "sample_03",
+  "real_shot": 18,
+  "chapter": 114,
+  "seconds": 6.0,
+  "shots": {
+   "ep22": "c114_s034",
+   "ep22_v2": "c114_s034",
+   "ep22_v2b": "c114_s034",
+   "ep22_v3": "c114_s028",
+   "ep22_v3b": "c114_s028",
+   "ep22_v3e": "c114_s023"
+  },
+  "line": "Oh, good morning, Katai-kun.",
+  "shows": "Tadano turns in his seat and smiles easily at Katai, whose back fills the foreground.",
+  "confidence": 0.98,
+  "mb": {
+   "mp4": 0.62,
+   "webp": 0.92
+  }
+ },
+ {
+  "name": "sample_04",
+  "real_shot": 38,
+  "chapter": 114,
+  "seconds": 3.0,
+  "shots": {
+   "ep22": "c114_s050",
+   "ep22_v2": "c114_s050",
+   "ep22_v2b": "c114_s050",
+   "ep22_v3": "c114_s041",
+   "ep22_v3b": "c114_s041",
+   "ep22_v3e": "c114_s037"
+  },
+  "line": "",
+  "shows": "Tadano gives a small, reassuring nod and a gentle smile.",
+  "confidence": 1.0,
+  "mb": {
+   "mp4": 0.3,
+   "webp": 0.51
+  }
+ },
+ {
+  "name": "sample_05",
+  "real_shot": 84,
+  "chapter": 116,
+  "seconds": 4.38,
+  "shots": {
+   "ep22": "c116_s005",
+   "ep22_v2": "c116_s005",
+   "ep22_v2b": "c116_s005",
+   "ep22_v3": "c116_s004",
+   "ep22_v3b": "c116_s004",
+   "ep22_v3e": "c116_s003"
+  },
+  "line": "You paused for a bit there.",
+  "shows": "Komi hides behind her raised notebook while Onemine smiles at her from the right.",
+  "confidence": 1.0,
+  "mb": {
+   "mp4": 0.53,
+   "webp": 0.68
+  }
+ },
+ {
+  "name": "sample_06",
+  "real_shot": 87,
+  "chapter": 116,
+  "seconds": 6.0,
+  "shots": {
+   "ep22": "c116_s008",
+   "ep22_v2": "c116_s008",
+   "ep22_v2b": "c116_s008",
+   "ep22_v3": "c116_s008",
+   "ep22_v3b": "c116_s008",
+   "ep22_v3e": "c116_s007"
+  },
+  "line": "Can I~ come too~?",
+  "shows": "Otori leans in with clasped hands as Onemine turns to her with a warm grin, Komi watching.",
+  "confidence": 0.84,
+  "mb": {
+   "mp4": 0.65,
+   "webp": 0.86
+  }
+ },
+ {
+  "name": "sample_07",
+  "real_shot": 193,
+  "chapter": 117,
+  "seconds": 4.05,
+  "shots": {
+   "ep22": "c117_s019",
+   "ep22_v2": "c117_s019",
+   "ep22_v2b": "c117_s019",
+   "ep22_v3": "c117_s022",
+   "ep22_v3b": "c117_s022",
+   "ep22_v3e": "c117_s016"
+  },
+  "line": "Hello! Happy Valentine's!",
+  "shows": "Najimi bursts through the classroom door with both arms flung wide, scarf flying.",
+  "confidence": 0.9,
+  "mb": {
+   "mp4": 0.75,
+   "webp": 1.0
+  }
+ },
+ {
+  "name": "sample_08",
+  "real_shot": 218,
+  "chapter": 117,
+  "seconds": 4.0,
+  "shots": {
+   "ep22": "c117_s037",
+   "ep22_v2": "c117_s037",
+   "ep22_v2b": "c117_s037",
+   "ep22_v3": "c117_s038",
+   "ep22_v3b": "c117_s038",
+   "ep22_v3e": "c117_s034"
+  },
+  "line": ".....",
+  "shows": "Komi offers a chocolate bag and Yadano takes it with both trembling hands.",
+  "confidence": 0.81,
+  "mb": {
+   "mp4": 0.57,
+   "webp": 0.86
+  }
+ },
+ {
+  "name": "sample_09",
+  "real_shot": 259,
+  "chapter": 117,
+  "seconds": 4.25,
+  "shots": {
+   "ep22": "c117_s079",
+   "ep22_v2": "c117_s079",
+   "ep22_v2b": "c117_s079",
+   "ep22_v3": "c117_s076",
+   "ep22_v3b": "c117_s076",
+   "ep22_v3e": "c117_s072"
+  },
+  "line": "...It's a friend chocolate.",
+  "shows": "Katai stands over the desk, flushed crimson, one hand still on the chocolate ribbon.",
+  "confidence": 0.95,
+  "mb": {
+   "mp4": 0.51,
+   "webp": 0.62
+  }
+ },
+ {
+  "name": "sample_10",
+  "real_shot": 301,
+  "chapter": 118,
+  "seconds": 3.0,
+  "shots": {
+   "ep22": "c118_s033",
+   "ep22_v2": "c118_s033",
+   "ep22_v2b": "c118_s033",
+   "ep22_v3": "c118_s027",
+   "ep22_v3b": "c118_s027",
+   "ep22_v3e": "c118_s032"
+  },
+  "line": "",
+  "shows": "Two empty swings hang side by side in a small park at dusk, bare winter trees behind them.",
+  "confidence": 0.98,
+  "mb": {
+   "mp4": 0.42,
+   "webp": 0.57
+  }
+ },
+ {
+  "name": "sample_11",
+  "real_shot": 336,
+  "chapter": 118,
+  "seconds": 5.09,
+  "shots": {
+   "ep22": "c118_s063",
+   "ep22_v2": "c118_s063",
+   "ep22_v2b": "c118_s063",
+   "ep22_v3": "c118_s054",
+   "ep22_v3b": "c118_s054",
+   "ep22_v3e": "c118_s056"
+  },
+  "line": "...It's... it's a friend chocolate...",
+  "shows": "Komi looks down bashfully beside Tadano's wide, astonished eyes in a split close-up.",
+  "confidence": 0.85,
+  "mb": {
+   "mp4": 0.48,
+   "webp": 0.56
+  }
+ },
+ {
+  "name": "sample_12",
+  "real_shot": 329,
+  "chapter": 118,
+  "seconds": 4.0,
+  "shots": {
+   "ep22": "c118_s055",
+   "ep22_v2": "c118_s055",
+   "ep22_v2b": "c118_s055",
+   "ep22_v3": "c118_s048",
+   "ep22_v3b": "c118_s048",
+   "ep22_v3e": "c118_s050"
+  },
+  "line": "Y... yes!?",
+  "shows": "Tadano stands stiff on the path, gripping the railing, mouth open in a cracked reply.",
+  "confidence": 0.99,
+  "mb": {
+   "mp4": 0.51,
+   "webp": 0.63
+  }
+ }
+]

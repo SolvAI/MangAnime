@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% block title %}Label ep{{ "%02d"|format(ep) }}{% endblock %}
+{% block css %}
+body{display:flex;flex-direction:column;overflow:hidden}
+#wrap{flex:1;display:grid;grid-template-columns:minmax(300px,400px) 1fr;min-height:0}
+#panels{overflow-y:auto;border-right:1px solid var(--line);padding:8px}
+.pan{display:grid;grid-template-columns:120px 1fr;gap:8px;padding:6px;border:2px solid transparent;border-radius:8px;cursor:pointer;margin-bottom:4px;background:var(--card)}
+.pan.active{border-color:var(--acc)}
+.pan img{width:120px;max-height:150px;object-fit:contain;background:#fff;border-radius:4px}
+.pan .t{font-size:12.5px;overflow-wrap:anywhere}
+.pan .chips{margin-top:4px;display:flex;gap:4px;flex-wrap:wrap}
+.chip{font-size:11.5px;border-radius:5px;padding:0 6px;background:var(--acc);color:var(--onacc)}
+.chip.auto{background:var(--auto);color:var(--onacc)}
+.chhead{font-weight:600;margin:10px 4px 4px;font-size:13px}
+#right{display:flex;flex-direction:column;min-width:0;min-height:0}
+#compare{display:flex;gap:12px;padding:10px;align-items:flex-start;border-bottom:1px solid var(--line);min-height:250px;max-height:46vh;overflow:auto}
+#compare .box{display:flex;flex-direction:column;gap:4px;min-width:0}
+#compare img{max-height:36vh;max-width:100%;border-radius:6px;background:#000;object-fit:contain}
+#compare #bigpanel{background:#fff;max-width:34vw}
+#kf{display:flex;gap:6px}
+#kf img{flex:1 1 0;min-width:0;max-height:36vh;object-fit:contain}
+#strip{flex:1;display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;padding:10px;align-items:flex-start;min-height:170px}
+#strip.grid{flex-wrap:wrap;overflow-y:auto;overflow-x:hidden;align-content:flex-start}
+.shot{flex:0 0 auto;width:172px;border:3px solid transparent;border-radius:8px;background:var(--card);cursor:pointer;padding:3px;position:relative}
+.shot img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:5px;background:#000;display:block}
+.shot .m{font-size:11.5px;display:flex;justify-content:space-between;gap:4px;margin-top:2px}
+.shot .d{font-size:11px;color:var(--mut);max-height:2.7em;overflow:hidden}
+.shot.sel{border-color:var(--acc)}
+.shot.sel.autosel{border-color:var(--auto)}
+.shot .used{position:absolute;right:6px;top:6px;background:rgba(0,0,0,.65);color:#fff;border-radius:999px;font-size:11px;padding:0 6px;display:none}
+.shot.isused .used{display:block}
+#msg{padding:10px}
+#help{font-size:12.5px;color:var(--mut);padding:6px 10px;border-top:1px solid var(--line)}
+{% endblock %}
+{% block head %}
+<span>ep{{ "%02d"|format(ep) }}</span>
+<form method="get" action="/ep/{{ ep }}" style="display:flex;gap:6px;align-items:center">
+  <label class="mut" for="chin">chapters</label>
+  <input type="text" id="chin" name="chapters" value="{{ chapters }}" placeholder="e.g. 12-15,17" size="12">
+  <button type="submit">Load</button>
+</form>
+<span id="prog" class="mut"></span>
+<span class="sp"></span>
+<button type="button" id="viewbtn" title="strip / grid (G)">Grid</button>
+<span id="state" class="mut"></span>
+{% endblock %}
+{% block body %}
+<div id="msg" class="mut">Loading…</div>
+<div id="wrap" hidden>
+  <div id="panels"></div>
+  <div id="right">
+    <div id="compare">
+      <div class="box"><span class="mut" id="plabel">panel</span><img id="bigpanel" alt="active panel"></div>
+      <div class="box" style="flex:1"><span class="mut" id="slabel">hover or click a shot</span><div id="kf"></div></div>
+    </div>
+    <div id="strip"></div>
+    <div id="help"><kbd>click</kbd> shot = assign to the active panel (<kbd>shift</kbd>+click = range) · <kbd>Enter</kbd> confirm + next · <kbd>X</kbd> no match + next · <kbd>U</kbd> reset panel · <kbd>J</kbd>/<kbd>K</kbd> or <kbd>↓</kbd>/<kbd>↑</kbd> next / previous panel · <kbd>N</kbd> next unreviewed · <kbd>[</kbd> <kbd>]</kbd> scroll shots · <kbd>G</kbd> strip / grid. Purple = automatic suggestion (not gold until confirmed).</div>
+  </div>
+</div>
+<script>
+(function(){
+  const EP = {{ ep|tojson }}, CH = {{ chapters|tojson }};
+  const $ = id => document.getElementById(id);
+  let D = null, A = {}, active = 0, lastShot = null, saveTimer = null, shotEl = {}, panEl = [];
+  const fmtT = s => { const m = Math.floor(s / 60); return m + ':' + (s - 60 * m).toFixed(1).padStart(4, '0'); };
+
+  function initState(){
+    D.panels.forEach(p => {
+      const g = D.gold[p.key], a = D.auto[p.key];
+      if (g) A[p.key] = {shots: new Set(g.shots), status: g.status};
+      else if (a) A[p.key] = {shots: new Set(a.shots), status: 'auto'};
+      else A[p.key] = {shots: new Set(), status: 'empty'};
+    });
+  }
+  function usedCount(){
+    const c = {};
+    D.panels.forEach(p => A[p.key].shots.forEach(s => { c[s] = (c[s] || 0) + 1; }));
+    return c;
+  }
+  function renderPanelMeta(i){
+    const p = D.panels[i], st = A[p.key], el = panEl[i];
+    const chips = Array.from(st.shots).sort((a, b) => a - b).map(s => '<span class="chip' + (st.status === 'auto' ? ' auto' : '') + '">#' + s + '</span>').join('');
+    const label = {confirmed: 'confirmed', no_match: 'no match', auto: 'auto' + (D.auto[p.key] && D.auto[p.key].confidence != null ? ' ' + Number(D.auto[p.key].confidence).toFixed(2) : ''), empty: 'to do'}[st.status];
+    el.querySelector('.chips').innerHTML = '<span class="badge b-' + st.status + '">' + label + '</span>' + chips;
+  }
+  function renderProgress(){
+    const n = {confirmed: 0, no_match: 0, auto: 0, empty: 0};
+    D.panels.forEach(p => n[A[p.key].status]++);
+    $('prog').textContent = (n.confirmed + n.no_match) + ' / ' + D.panels.length + ' reviewed · ' + n.auto + ' auto · ' + n.empty + ' to do';
+  }
+  function renderShots(){
+    const st = A[D.panels[active].key], used = usedCount();
+    D.shots.forEach(s => {
+      const el = shotEl[s.shot], sel = st.shots.has(s.shot);
+      el.classList.toggle('sel', sel);
+      el.classList.toggle('autosel', sel && st.status === 'auto');
+      const others = (used[s.shot] || 0) - (sel ? 1 : 0);
+      el.classList.toggle('isused', others > 0);
+      el.querySelector('.used').textContent = others > 0 ? '×' + others : '';
+    });
+  }
+  function preview(s){
+    $('slabel').textContent = 'shot #' + s.shot + ' · ' + fmtT(s.start) + ' – ' + fmtT(s.end) + ' (' + (s.end - s.start).toFixed(1) + ' s)' + (s.text ? ' · ' + s.text : '');
+    const n = Math.min(Math.max(s.nkf, 1), 4);
+    $('kf').innerHTML = Array.from({length: n}, (_, k) => '<img src="/img/shot/' + EP + '/' + s.shot + '/' + k + '?h=360" alt="keyframe">').join('');
+  }
+  function setActive(i, scroll){
+    if (!D.panels.length) return;
+    active = Math.max(0, Math.min(D.panels.length - 1, i));
+    panEl.forEach((el, k) => el.classList.toggle('active', k === active));
+    const p = D.panels[active];
+    $('bigpanel').src = '/img/panel/' + p.idx + '?h=520';
+    $('plabel').textContent = 'chapter ' + p.chapter + ' · page ' + p.page + ' · panel ' + p.panel + ' (order ' + p.order + ')' + (p.text ? ' · ' + p.text : '');
+    panEl[active].scrollIntoView({block: 'nearest'});
+    renderShots();
+    if (scroll !== false){
+      let target = null;
+      const mine = Array.from(A[p.key].shots).sort((a, b) => a - b);
+      if (mine.length) target = mine[0];
+      else for (let k = active - 1; k >= 0 && target === null; k--){ const s = Array.from(A[D.panels[k].key].shots); if (s.length) target = Math.max.apply(null, s); }
+      if (target !== null && shotEl[target]){ shotEl[target].scrollIntoView({block: 'nearest', inline: 'center'}); const s = D.shots.find(x => x.shot === target); if (s) preview(s); }
+    }
+  }
+  function touch(){
+    renderPanelMeta(active); renderShots(); renderProgress();
+    clearTimeout(saveTimer); saveTimer = setTimeout(save, 400);
+    $('state').textContent = 'saving…';
+  }
+  async function save(){
+    const rows = D.panels.filter(p => ['confirmed', 'no_match'].includes(A[p.key].status)).map(p => ({key: p.key, shots: Array.from(A[p.key].shots), status: A[p.key].status}));
+    try {
+      const r = await fetch('/api/ep/' + EP + '/save', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({rows: rows})});
+      const j = await r.json();
+      $('state').textContent = j.ok ? 'saved ' + j.n + ' rows · ' + new Date().toLocaleTimeString() : 'SAVE FAILED: ' + (j.error || r.status);
+      $('state').style.color = j.ok ? '' : 'var(--bad)';
+    } catch (e) { $('state').textContent = 'SAVE FAILED: ' + e; $('state').style.color = 'var(--bad)'; }
+  }
+  function toggleShot(s, ev){
+    const st = A[D.panels[active].key];
+    if (ev && ev.shiftKey && lastShot !== null){
+      const ids = D.shots.map(x => x.shot), a = ids.indexOf(lastShot), b = ids.indexOf(s.shot);
+      ids.slice(Math.min(a, b), Math.max(a, b) + 1).forEach(id => st.shots.add(id));
+    } else if (st.shots.has(s.shot)) st.shots.delete(s.shot); else st.shots.add(s.shot);
+    lastShot = s.shot;
+    st.status = st.shots.size ? 'confirmed' : 'empty';
+    preview(s); touch();
+  }
+  function confirmActive(){
+    const st = A[D.panels[active].key];
+    if (!st.shots.size){ $('state').textContent = 'no shot selected: click shots, or press X for "no match"'; return; }
+    st.status = 'confirmed'; touch(); setActive(active + 1);
+  }
+  function noMatch(){ const st = A[D.panels[active].key]; st.shots = new Set(); st.status = 'no_match'; touch(); setActive(active + 1); }
+  function resetActive(){
+    const p = D.panels[active], a = D.auto[p.key];
+    A[p.key] = a ? {shots: new Set(a.shots), status: 'auto'} : {shots: new Set(), status: 'empty'};
+    touch();
+  }
+  function nextTodo(){
+    for (let k = 1; k <= D.panels.length; k++){ const i = (active + k) % D.panels.length; if (['auto', 'empty'].includes(A[D.panels[i].key].status)){ setActive(i); return; } }
+  }
+  function build(){
+    const P = $('panels'), S = $('strip');
+    let lastCh = null;
+    D.panels.forEach((p, i) => {
+      if (p.chapter !== lastCh){ const h = document.createElement('div'); h.className = 'chhead'; h.textContent = 'Chapter ' + p.chapter; P.appendChild(h); lastCh = p.chapter; }
+      const el = document.createElement('div'); el.className = 'pan';
+      el.innerHTML = '<img loading="lazy" src="/img/panel/' + p.idx + '?h=150" alt="panel"><div><div class="mut">p' + p.page + ' · panel ' + p.panel + ' · #' + p.order + '</div><div class="t"></div><div class="chips"></div></div>';
+      el.querySelector('.t').textContent = p.text || p.caption || '';
+      el.addEventListener('click', () => setActive(i));
+      P.appendChild(el); panEl.push(el);
+    });
+    D.shots.forEach(s => {
+      const el = document.createElement('div'); el.className = 'shot';
+      el.innerHTML = '<img loading="lazy" src="/img/shot/' + EP + '/' + s.shot + '/0?h=110" alt="shot"><span class="used"></span><div class="m"><b>#' + s.shot + '</b><span>' + fmtT(s.start) + ' · ' + (s.end - s.start).toFixed(1) + 's</span></div><div class="d"></div>';
+      el.querySelector('.d').textContent = s.text || '';
+      el.addEventListener('click', ev => toggleShot(s, ev));
+      el.addEventListener('mouseenter', () => preview(s));
+      S.appendChild(el); shotEl[s.shot] = el;
+    });
+    D.panels.forEach((_, i) => renderPanelMeta(i));
+    renderProgress();
+  }
+  function toggleView(){ const g = $('strip').classList.toggle('grid'); $('viewbtn').textContent = g ? 'Strip' : 'Grid'; }
+  $('viewbtn').addEventListener('click', toggleView);
+  document.addEventListener('keydown', e => {
+    if (!D || !D.panels.length) return;
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key;
+    if (k === 'j' || k === 'ArrowDown') setActive(active + 1);
+    else if (k === 'k' || k === 'ArrowUp') setActive(active - 1);
+    else if (k === 'Enter' || k === 'c') confirmActive();
+    else if (k === 'x' || k === 'X') noMatch();
+    else if (k === 'u' || k === 'U' || k === 'Backspace') resetActive();
+    else if (k === 'n' || k === 'N') nextTodo();
+    else if (k === '[') $('strip').scrollBy({left: -0.8 * $('strip').clientWidth, top: -0.8 * $('strip').clientHeight});
+    else if (k === ']') $('strip').scrollBy({left: 0.8 * $('strip').clientWidth, top: 0.8 * $('strip').clientHeight});
+    else if (k === 'g' || k === 'G') toggleView();
+    else return;
+    e.preventDefault();
+  });
+  fetch('/api/ep/' + EP + (CH ? '?chapters=' + encodeURIComponent(CH) : '')).then(r => r.json()).then(d => {
+    D = d;
+    if (!CH && d.chapters.length) $('chin').value = d.chapters[0] + (d.chapters.length > 1 ? '-' + d.chapters[d.chapters.length - 1] : '');
+    const problems = [];
+    if (!d.shots.length) problems.push('No shots for episode ' + EP + ' (anime/shots.jsonl is missing or has no rows for it).');
+    if (!d.chapters.length) problems.push('The chapters of this episode are not known yet (no alignment.jsonl / queue entry): type them in the "chapters" box above, e.g. 12-15.');
+    else if (!d.panels.length) problems.push('No panels found for chapters ' + d.chapters.join(', ') + ' (manga/panels.jsonl is missing or does not contain them).');
+    if (problems.length){ $('msg').innerHTML = ''; problems.forEach(t => { const b = document.createElement('div'); b.className = 'warnbox'; b.textContent = t; $('msg').appendChild(b); }); }
+    if (!d.panels.length || !d.shots.length) return;
+    if (!problems.length) $('msg').hidden = true;
+    $('wrap').hidden = false;
+    initState(); build(); setActive(0);
+    $('state').textContent = Object.keys(d.gold).length ? Object.keys(d.gold).length + ' gold rows loaded' : 'nothing saved yet';
+  }).catch(e => { $('msg').textContent = 'Could not load the episode: ' + e; });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,74 @@
+# Character roster used by the local VLM (panel/shot tagging), the director and the QA judge.
+# Names follow the fandom wiki (https://komisan.fandom.com/wiki/Category:Characters), family name first.
+# `look` = how to recognise the character in the anime; `manga` = black-and-white cues; `voice` = delivery notes for TTS.
+roster:
+  - {name: Komi, full: "Komi Shouko", aliases: ["Komi-san", "Shouko", "Komi Shouko"], role: main,
+     look: "tall, very beautiful girl, long straight dark purple-black hair with blunt bangs, pale skin, dark eyes with long lashes, usually expressionless; school uniform: navy blazer, red bow, red-and-black striped skirt, black tights",
+     manga: "long straight black hair, tall, elegant, large glossy eyes; in comedy panels drawn as a simplified face with huge round eyes, sometimes with cat ears when excited",
+     voice: "almost never speaks; soft, breathy, hesitant fragments; most of her lines are written in a notebook"}
+  - {name: Tadano, full: "Tadano Hitohito", aliases: ["Tadano-kun", "Hitohito"], role: main,
+     look: "average-looking boy, short black hair with a small flower-shaped cowlick on top, dark eyes; navy blazer, striped tie",
+     manga: "plain boy, short black hair with a little flower-like ahoge on top of the head",
+     voice: "ordinary teenage boy, gentle, frequently flustered inner monologue and tsukkomi retorts"}
+  - {name: Najimi, full: "Osana Najimi", aliases: ["Najimi-chan", "Osana"], role: main,
+     look: "short messy lavender-brown hair, big purple eyes, mischievous grin, wears the boys' striped necktie with the girls' skirt",
+     manga: "short light hair, androgynous, necktie plus skirt, always grinning or scheming",
+     voice: "high energy, fast, playful, mischievous"}
+  - {name: Yamai, full: "Yamai Ren", aliases: ["Yamai-san", "Ren"], role: recurring,
+     look: "girl with orange-brown hair tied in a side ponytail, brown eyes, sweet smile that turns obsessive",
+     manga: "side ponytail, cheerful face that becomes creepy/obsessive about Komi",
+     voice: "sweet and polite, switching to manic obsession"}
+  - {name: Agari, full: "Agari Himiko", aliases: ["Agari-san", "Himiko"], role: recurring,
+     look: "shy girl with brown hair in two low braids, round glasses, often blushing and sweating",
+     manga: "braids, glasses, nervous posture", voice: "timid, stammering, quiet"}
+  - {name: Nakanaka, full: "Nakanaka Omoharu", aliases: ["Nakanaka-san", "Omoharu"], role: recurring,
+     look: "girl with long dark hair covering one eye, bandage/eyepatch motif, dramatic chuunibyou poses",
+     manga: "hair over one eye, theatrical poses", voice: "grand, theatrical, deep 'dark power' delivery that cracks when flustered"}
+  - {name: Katai, full: "Katai Makoto", aliases: ["Katai-kun", "Makoto"], role: recurring,
+     look: "very tall muscular boy with slicked-back light brown hair, sharp intimidating eyes, scary face but timid inside",
+     manga: "huge delinquent-looking boy, sharp eyes", voice: "says very little aloud (low, gruff), anxious and sweet inner monologue"}
+  - {name: Onemine, full: "Onemine Nene", aliases: ["Onemine-san", "Nene"], role: recurring,
+     look: "big-sister type girl, brown hair in a ponytail, kind eyes", manga: "ponytail, caring expression", voice: "warm, mature, caring"}
+  - {name: Otori, full: "Otori Kaede", aliases: ["Otori-san", "Kaede"], role: recurring,
+     look: "airheaded girl with fluffy light hair, sleepy smile, slow movements", manga: "fluffy hair, sleepy face", voice: "very slow, drawn-out, soft"}
+  - {name: Yadano, full: "Yadano Makeru", aliases: ["Yadano-san", "Makeru"], role: recurring,
+     look: "competitive girl with black hair in a high ponytail, fierce eyes", manga: "ponytail, competitive glare", voice: "loud, competitive, declares challenges"}
+  - {name: Ase, full: "Ase Shibuki", aliases: ["Ase-san", "Shibuki"], role: minor,
+     look: "girl with dark bob hair, constantly sweating, anxious", manga: "bob hair with sweat drops", voice: "anxious, apologetic"}
+  - {name: Inaka, full: "Inaka Nokoko", aliases: ["Inaka-san", "Nokoko"], role: minor,
+     look: "country girl with short twin tails, tries to look urban", manga: "short twin tails", voice: "polite standard speech that slips into rural dialect"}
+  - {name: Kometani, full: "Kometani Chuusaku", aliases: ["Kometani-kun"], role: minor,
+     look: "boy with glasses and neat dark hair who comments on events", manga: "glasses, serious commentator", voice: "dry play-by-play commentary"}
+  - {name: Sonoda, full: "Sonoda Taisei", aliases: ["Sonoda-kun"], role: minor, look: "boy with a shaved head", manga: "shaved head", voice: "ordinary boy"}
+  - {name: Shinobino, full: "Shinobino Mono", aliases: ["Shinobino-kun"], role: minor, look: "ninja-like boy with a face mask/scarf", manga: "ninja scarf", voice: "ninja speech ('de gozaru')"}
+  - {name: Chiarai, full: "Chiarai Shigeo", aliases: ["Chiarai-kun"], role: minor, look: "boy with spiky hair, one of the class boys", manga: "spiky hair", voice: "ordinary boy"}
+  - {name: Kishi, full: "Kishi Himeko", aliases: ["Kishi-san"], role: minor, look: "girl with wavy hair, a classmate", manga: "wavy hair", voice: "ordinary girl"}
+  - {name: Sasaki, full: "Sasaki Ayami", aliases: ["Sasaki-san", "Ayami"], role: recurring,
+     look: "cool girl with short dark hair and a yo-yo", manga: "short hair, yo-yo", voice: "cool, low-key"}
+  - {name: Katou, full: "Katou Mikuni", aliases: ["Katou-san", "Mikuni"], role: recurring,
+     look: "serious girl with long dark hair in a low ponytail, shogi enthusiast", manga: "low ponytail, serious face", voice: "earnest, formal"}
+  - {name: Emoyama, full: "Emoyama Akako", aliases: ["Emoyama-san"], role: minor, look: "girl with glasses who gets emotional watching others", manga: "glasses, teary", voice: "emotional"}
+  - {name: Naruse, full: "Naruse Shisuto", aliases: ["Naruse-kun", "Shisuto"], role: minor,
+     look: "narcissistic handsome boy with wavy blond hair", manga: "wavy light hair, sparkles", voice: "smug, self-admiring"}
+  - {name: Komi's mother, full: "Komi Shuuko", aliases: ["Shuuko", "Mom"], role: family,
+     look: "looks like an older Komi with long dark hair and a huge cheerful smile, very talkative", manga: "Komi lookalike, always smiling", voice: "bubbly, youthful, talkative"}
+  - {name: Komi's father, full: "Komi Masayoshi", aliases: ["Masayoshi", "Dad"], role: family,
+     look: "handsome silent man with dark hair, stoic like Komi", manga: "stoic handsome man", voice: "almost silent, deep"}
+  - {name: Shousuke, full: "Komi Shousuke", aliases: ["Shousuke-kun", "Komi's brother"], role: family,
+     look: "Komi's younger brother, dark hair, same stoic face, middle-school uniform", manga: "boy version of Komi", voice: "silent, deadpan"}
+  - {name: Tadano's sister, full: "Tadano Hitomi", aliases: ["Hitomi"], role: family,
+     look: "Tadano's younger sister, short dark hair with a similar cowlick, energetic", manga: "girl with Tadano's cowlick", voice: "energetic, teasing"}
+  - {name: Teacher, full: "Homeroom teacher", aliases: ["Sensei"], role: minor, look: "adult homeroom teacher", manga: "adult teacher", voice: "adult, tired"}
+  - {name: Narrator, full: "Narrator", aliases: ["Narration"], role: voice_only,
+     look: "(off-screen)", manga: "rectangular narration boxes", voice: "calm, slightly amused adult female narrator"}
+  - {name: Classmates, full: "Unnamed classmates / crowd", aliases: ["Student", "Classmate", "Girl", "Boy", "Crowd"], role: crowd,
+     look: "background students in navy blazers", manga: "background students, often faceless", voice: "assorted student voices"}
+show:
+  title: "Komi Can't Communicate (Komi-san wa, Komyushou desu.)"
+  setting: "Itan Private High School, class 1-1; modern Japanese suburb"
+  style: "bright, clean TV anime (OLM, 2021–22): flat pastel colouring, thin outlines, soft school lighting; comedy beats use simplified chibi faces, bold on-screen text and speed lines"
+  conventions:
+    - "Komi rarely speaks: her lines are usually handwritten in a notebook shown on screen (pencil-scratch sound); others read it."
+    - "A calm female narrator explains situations ('Komi-san has a communication disorder')."
+    - "Each manga chapter is one 'Communication' segment that opens with a short title card."
+    - "Inner monologues are common (Tadano's retorts, Katai's anxieties) and are voiced over reaction shots."

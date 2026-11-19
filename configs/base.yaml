@@ -1,0 +1,73 @@
+# Base config. Every stage reads this through src/common/config.py (OmegaConf).
+paths:
+  repo: /home/user/komi-poc                      # symlink to the repo (no spaces in path)
+  work: /home/user/komi-poc-work                 # ext4 work area
+  assets_dir: /mnt/nas/datasets/Komi_Cant_Communicate   # ORIGINALS, read-only. Never write here.
+  nas_out: /mnt/nas/datasets/Komi_Cant_Communicate_poc  # mirror target for datasets/outputs (rsync at milestones)
+  nas_models: "/run/user/1000/gvfs/smb-share:server=nas.local,share=models"
+  raw: ${paths.work}/data/raw
+  interim: ${paths.work}/data/interim
+  processed: ${paths.work}/data/processed
+  models: ${paths.work}/models
+  runs: ${paths.work}/runs
+  cache: ${paths.work}/cache
+  tmp: ${paths.work}/tmp
+  comfy_root: "/path/to/disk/ComfyUI"  # existing local ComfyUI install (weights reused)
+  ffmpeg: ${paths.work}/tools/ffenv/bin/ffmpeg
+  ffprobe: ${paths.work}/tools/ffenv/bin/ffprobe
+
+split:
+  train_episodes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+  heldout_episodes: [22, 23, 24]
+
+anime:
+  audio_lang: jpn            # D-002: Japanese audio, English subtitles as dialogue text
+  fps_native: 23.976
+  work_height: 480           # proxy resolution used for parsing/keyframes
+  train_fps: 16
+  train_frames: 81
+
+budget:
+  api_usd: 200.0             # stop line for all paid API calls of a project (DeepSeek + Gemini)
+  api_usd_effective: 200.0   # DeepSeek + Gemini together (D-044, D-055)
+  api_soft_fraction: 1.0     # the stop line IS the cap now; beyond it the work continues with Claude subagents instead of the APIs (D-055)
+  gpu_usd: 200.0
+
+llm:
+  local:
+    base_url: http://127.0.0.1:8188/v1
+    port: 8188
+    model: qwen3.8-27b
+    gguf: ${paths.models}/llm/Qwen3.8-27B-UD-Q4_K_M.gguf
+    mmproj: ${paths.models}/llm/mmproj-Qwen3.8-27B-Uncensored-f16.gguf
+    server_bin: /home/user/src/llama.cpp/build/bin/llama-server
+    ctx: 8192            # per slot (x parallel); captions/attribution fit easily
+    parallel: 4
+  deepseek:
+    base_url: https://api.deepseek.com
+    model: deepseek-flash      # = DeepSeek-V4.1-Flash (verified via /models on 2026-11-10; text+image input)
+    # USD per 1M tokens (https://api-docs.deepseek.com/quick_start/pricing, read 2026-11-10)
+    price_in_peak: 0.30
+    price_in_offpeak: 0.15
+    price_in_cached_peak: 0.006
+    price_in_cached_offpeak: 0.003
+    price_out_peak: 1.20
+    price_out_offpeak: 0.60
+
+  gemini:
+    base_url: https://generativelanguage.googleapis.com/v1beta
+    model: gemini-3.8-flash    # verified via /models on 2026-11-12 (1M context, images in); everything visual (D-043)
+    thinking_level: low        # cannot be disabled on this model; thought tokens are billed as output
+    # USD per 1M tokens (aistudio.google.com/docs/pricing, read 2026-11-12; doubles on 2027-01-01)
+    price_in: 0.75
+    price_in_cached: 0.075
+    price_out: 3.75
+  gemini_image:               # first frames from reference pictures (D-053); same API key as `gemini`
+    model: gemini-nano-banana-2.1      # listed by /models on 2026-11-12; up to 4 character + 10 object reference images
+    image_size: 1K                     # 1376x768 at 16:9 (1,120 output tokens)
+    # USD per 1M tokens (aistudio.google.com/docs/pricing, read 2026-11-12): $0.0336 per 1K image
+    price_in: 1.50
+    price_out: 30.00
+
+comfy:
+  port: 8199

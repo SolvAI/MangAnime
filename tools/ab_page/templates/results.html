@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}A/B results: {{ experiment }}{% endblock %}
+{% block head %}<span class="mut">{{ experiment }}</span><span class="sp"></span><a href="/rate">rate</a><a href="/api/results">json</a>{% endblock %}
+{% macro pct(x) %}{% if x is none %}–{% else %}{{ "%.1f"|format(100 * x) }}%{% endif %}{% endmacro %}
+{% macro table(crit_map) %}
+<div class="tablewrap"><table>
+  <tr><th>criterion</th><th class="l">comparison</th><th>wins</th><th>wins</th><th>ties</th><th>n</th><th>win rate (no ties)</th><th>95% CI</th><th>sign test p</th></tr>
+  {% for c in criteria if c in crit_map %}{% for r in crit_map[c] %}
+  <tr>
+    <td>{{ c }}</td>
+    <td class="l"><span class="{{ 'win' if r.winner == r.label_x }}">{{ r.label_x }}</span> vs <span class="{{ 'win' if r.winner == r.label_y }}">{{ r.label_y }}</span></td>
+    <td>{{ r.label_x }} {{ r.wins_x }}</td><td>{{ r.label_y }} {{ r.wins_y }}</td><td>{{ r.ties }}</td><td>{{ r.n }}</td>
+    <td>{{ r.label_x }} {{ pct(r.win_rate_x) }}</td>
+    <td>{% if r.ci95 %}{{ pct(r.ci95[0]) }} – {{ pct(r.ci95[1]) }}{% else %}–{% endif %}</td>
+    <td class="{{ 'sig' if r.significant else 'ns' }}">{{ "%.4f"|format(r.p_sign) }}{{ " *" if r.significant }}</td>
+  </tr>
+  {% endfor %}{% endfor %}
+  {% for c in crit_map if c not in criteria %}{% for r in crit_map[c] %}
+  <tr><td>{{ c }}</td><td class="l">{{ r.label_x }} vs {{ r.label_y }}</td><td>{{ r.label_x }} {{ r.wins_x }}</td><td>{{ r.label_y }} {{ r.wins_y }}</td><td>{{ r.ties }}</td><td>{{ r.n }}</td><td>{{ r.label_x }} {{ pct(r.win_rate_x) }}</td><td>{% if r.ci95 %}{{ pct(r.ci95[0]) }} – {{ pct(r.ci95[1]) }}{% else %}–{% endif %}</td><td class="{{ 'sig' if r.significant else 'ns' }}">{{ "%.4f"|format(r.p_sign) }}</td></tr>
+  {% endfor %}{% endfor %}
+</table></div>
+{% endmacro %}
+{% block main %}
+<p class="mut">{{ s.n_ratings }} rating{{ "s" if s.n_ratings != 1 }} covering {{ s.n_pairs_rated }} of {{ n_pairs }} pairs. Win rate excludes ties; CI is the exact binomial interval; p is the two-sided exact sign test against 50/50 (* = p &lt; 0.05). Only the latest rating per rater and pair counts.</p>
+{% if s.n_ratings == 0 %}<div class="warnbox">No ratings yet.</div>{% endif %}
+{% for g, title in [("human", "Human raters"), ("judge", "Automatic raters (judge:*, metric:*)"), ("all", "Everything pooled")] %}
+{% set G = s.groups[g] %}
+{% if G.n_ratings and (g != "all" or (s.groups.human.n_ratings and s.groups.judge.n_ratings)) %}
+<h2>{{ title }} <span class="mut">· {{ G.n_ratings }} rating{{ "s" if G.n_ratings != 1 }} · {{ G.n_raters }} rater{{ "s" if G.n_raters != 1 }}</span></h2>
+{{ table(G.criteria) }}
+{% if G.n_raters > 1 %}<h3>One vote per pair (majority over raters)</h3>{{ table(G.criteria_by_pair_majority) }}{% endif %}
+{% endif %}
+{% endfor %}
+{% if s.by_rater %}
+<h2>Per rater</h2>
+{% for rater, cm in s.by_rater.items() %}<h3>{{ rater }} <span class="mut">· {{ s.raters[rater] }} pairs</span></h3>{{ table(cm) }}{% endfor %}
+{% endif %}
+<h2>Checks</h2>
+<div class="tablewrap"><table>
+  <tr><th>check</th><th>value</th><th class="l">reading</th></tr>
+  <tr><td>left chosen (humans)</td><td>{{ s.position_bias.left }} / {{ s.position_bias.left + s.position_bias.right }} ({{ pct(s.position_bias.left_rate) }})</td><td class="l">should be near 50%; sign test p = {{ "%.3f"|format(s.position_bias.p_sign) }}</td></tr>
+  {% for j, a in s.judge_agreement.items() %}
+  <tr><td>{{ j }} vs human majority</td><td>{{ a.agree }} / {{ a.n }} ({{ pct(a.rate) }})</td><td class="l">same winner on pair × criterion, ties left out</td></tr>
+  {% endfor %}
+</table></div>
+{% endblock %}

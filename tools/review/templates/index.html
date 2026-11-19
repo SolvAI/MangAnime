@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block main %}
+<p class="mut">Automatically named clusters, low-confidence first. Corrections are saved next to each file as <code>names_override.json</code>.</p>
+<div class="card"><table>
+<tr><th>source</th><th>clusters</th><th>reviewed</th><th>low confidence, open</th><th>file</th></tr>
+{% for s in sources %}
+<tr>
+  <td>{% if s.exists and not s.error %}<a href="/s/{{ s.name }}">{{ s.name }}</a>{% else %}{{ s.name }}{% endif %}</td>
+  {% if s.exists and not s.error %}<td>{{ s.n }}</td><td>{{ s.reviewed }}</td><td>{{ s.low_open }}</td>
+  {% elif s.error %}<td colspan="3" style="color:var(--bad)">cannot read: {{ s.error }}</td>
+  {% else %}<td colspan="3" class="mut">not created yet</td>{% endif %}
+  <td><code>{{ s.path }}</code></td>
+</tr>
+{% endfor %}
+</table></div>
+{% endblock %}

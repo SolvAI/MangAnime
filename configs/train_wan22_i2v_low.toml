@@ -1,0 +1,45 @@
+# musubi-tuner --config_file: Wan 2.2 A14B I2V LoRA, LOW-noise expert (timesteps 0..900).
+# Paths, step counts and memory options are passed on the command line by src/train/wan_lora.py (local smoke)
+# and infra/hf_jobs/train_job.py (HF job); command-line options override this file.
+# Source of the Wan 2.2 specifics: musubi-tuner docs/wan.md @ f8a1b037 ("Recommended Min/Max Timestep Settings").
+
+[model]
+task = "i2v-A14B"
+mixed_precision = "fp16"            # the Comfy-Org repackaged DiT is fp16; musubi asserts fp16 (bf16 is rejected)
+sdpa = true
+gradient_checkpointing = true
+# One time embedding per sample instead of one per token. For A14B training every token of a sample has the same
+# timestep, so the result is the same; measured on rtx-pro-6000 at 832x480x81: 59 GB instead of 68 GB peak VRAM and
+# ~4 % faster (docs/wan.md: "no effect on inference or training within the range that has been confirmed").
+# Remove this line to get the stock Wan 2.2 code path.
+force_v2_1_time_embedding = true
+
+[network]
+network_module = "networks.lora_wan"
+network_dim = 32
+network_alpha = 16
+
+[optimizer]
+optimizer_type = "adamw8bit"
+learning_rate = 1e-4
+max_grad_norm = 1.0
+lr_scheduler = "constant_with_warmup"   # resume-safe: musubi restarts its step counter at 0 after --resume
+lr_warmup_steps = 100
+
+[timesteps]
+timestep_sampling = "shift"
+discrete_flow_shift = 3.0           # musubi's 480p I2V default; spreads samples over the detail range 0..900
+min_timestep = 0                    # I2V low-noise expert: boundary 0.9
+max_timestep = 900
+preserve_distribution_shape = true  # rejection sampling inside [min, max] instead of rescaling
+
+[data]
+max_data_loader_n_workers = 2
+persistent_data_loader_workers = true
+seed = 42
+
+[output]
+save_precision = "fp16"             # halves the checkpoint size; ComfyUI loads it as is
+metadata_title = "komi_wan22_i2v_low"
+metadata_description = "Komi POC style LoRA, Wan 2.2 A14B I2V low-noise expert. Trigger: komi_anime_style"
+log_with = "tensorboard"
